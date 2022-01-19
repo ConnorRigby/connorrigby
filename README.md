@@ -25,6 +25,7 @@ to Nerves and related projects.
 You may have stumbled upon some content authored by me. Below are posts
 I still find useful to this day.
 
+* [IEx In A Box](https://cone.codes/posts/iex-in-a-box/)
 * [Auto validating Firmware with Nerves](https://cone.codes/posts/auto-validate-nerves-firmware/)
 * [Mocks and Explicit Contracts with Nerves](https://embedded-elixir.com/post/2018-09-25-mocks-and-explicit-contracts-expansion/)
 * [Debugging C Code on Nerves](https://embedded-elixir.com/post/2021-07-03-debugging-c/)
