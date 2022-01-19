@@ -69,4 +69,4 @@ paginate = 5
 
     [languages.en.params.logo]
       logoText = "cone.codes"
-      logoHomeLink = "/connorrigby"
+      logoHomeLink = "/"
