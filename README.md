@@ -44,7 +44,7 @@ I have been known to start unfinishable projects.
 The one's I find most interesting are listed below
 
 * [Miata Bot](https://github.com/miata-bot/) - A Discord moderation bot that is used on the public Miata Server.
-* [Chromod](https://github.com/connorrigby/chromoid) - A playground for connecting Nerves devices to Discord. 
+* [Chromoid](https://github.com/connorrigby/chromoid) - A playground for connecting Nerves devices to Discord. 
 * [Gameboy Emulator](https://github.com/ConnorRigby/lameboy) - A work in progress gameboy emulator and debugger written in Zig.
 * [Reactor](https://github.com/ConnorRigby/reactor) - A WIP Hot Code Reloading framework for Elixir
 
