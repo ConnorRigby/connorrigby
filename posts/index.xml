@@ -1,1 +1,213 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on My New Hugo Site</title><link>https://connorrigby.github.io/connorrigby/posts/</link><description>Recent content in Posts on My New Hugo Site</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 19 Jan 2022 08:42:31 -0700</lastBuildDate><atom:link href="https://connorrigby.github.io/connorrigby/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>My First Post</title><link>https://connorrigby.github.io/connorrigby/posts/my-first-post/</link><pubDate>Wed, 19 Jan 2022 08:42:31 -0700</pubDate><guid>https://connorrigby.github.io/connorrigby/posts/my-first-post/</guid><description/><content/></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Cone's Dev stuff</title><link>https://connorrigby.github.io/connorrigby/posts/</link><description>Recent content in Posts on Cone's Dev stuff</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>Creative Commons Attribution 4.0 International</copyright><lastBuildDate>Wed, 19 Jan 2022 08:42:31 -0700</lastBuildDate><atom:link href="https://connorrigby.github.io/connorrigby/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Automtatically Validating Nerves Firmware</title><link>https://connorrigby.github.io/connorrigby/posts/auto-validate-nerves-firmware/</link><pubDate>Wed, 19 Jan 2022 08:42:31 -0700</pubDate><guid>https://connorrigby.github.io/connorrigby/posts/auto-validate-nerves-firmware/</guid><description>TLDR Here&amp;rsquo;s the code you probably want. Modify it as you see fit.
+# Copyright 2022 Connor Rigby # # Licensed under the Apache License, Version 2.0 (the &amp;#34;License&amp;#34;); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at # # http://www.apache.org/licenses/LICENSE-2.0 # # Unless required by applicable law or agreed to in writing, software # distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS, # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</description><content>&lt;h1 id="tldr">TLDR&lt;/h1>
+&lt;p>Here&amp;rsquo;s the code you probably want. Modify it as you see fit.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#75715e"># Copyright 2022 Connor Rigby&lt;/span>
+&lt;span style="color:#75715e"># &lt;/span>
+&lt;span style="color:#75715e"># Licensed under the Apache License, Version 2.0 (the &amp;#34;License&amp;#34;);&lt;/span>
+&lt;span style="color:#75715e"># you may not use this file except in compliance with the License.&lt;/span>
+&lt;span style="color:#75715e"># You may obtain a copy of the License at&lt;/span>
+&lt;span style="color:#75715e"># &lt;/span>
+&lt;span style="color:#75715e"># http://www.apache.org/licenses/LICENSE-2.0&lt;/span>
+&lt;span style="color:#75715e"># &lt;/span>
+&lt;span style="color:#75715e"># Unless required by applicable law or agreed to in writing, software&lt;/span>
+&lt;span style="color:#75715e"># distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS,&lt;/span>
+&lt;span style="color:#75715e"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&lt;/span>
+&lt;span style="color:#75715e"># See the License for the specific language governing permissions and&lt;/span>
+&lt;span style="color:#75715e"># limitations under the License.&lt;/span>
+&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyFirmware.Validator&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#a6e22e">@moduledoc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
+&lt;/span>&lt;span style="color:#e6db74"> Validates the currently running firmware as soon as
+&lt;/span>&lt;span style="color:#e6db74"> the device connects to NervesHub. This is implemented
+&lt;/span>&lt;span style="color:#e6db74"> via setting a callback in `:heart`.
+&lt;/span>&lt;span style="color:#e6db74">
+&lt;/span>&lt;span style="color:#e6db74"> Validation is implemented by polling certain functions,
+&lt;/span>&lt;span style="color:#e6db74"> namely: `NervesHubLink.connected?()`. It is given
+&lt;/span>&lt;span style="color:#e6db74"> 5 minutes to connect. If it does not connect, the `:heart`
+&lt;/span>&lt;span style="color:#e6db74"> module will reboot the device via `nerves_heart`.
+&lt;/span>&lt;span style="color:#e6db74">
+&lt;/span>&lt;span style="color:#e6db74"> All the code in this module must be **VERY SAFE** a crash
+&lt;/span>&lt;span style="color:#e6db74"> will cause the device to reboot.
+&lt;/span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#f92672">use&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;span style="color:#f92672">require&lt;/span> &lt;span style="color:#a6e22e">Logger&lt;/span>
+&lt;span style="color:#75715e"># 5 minutes&lt;/span>
+&lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span> &lt;span style="color:#ae81ff">300_000&lt;/span>
+&lt;span style="color:#75715e"># shoudl be started in a supervisor spec&lt;/span>
+&lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> start_link(args, opts \\ [&lt;span style="color:#e6db74">name&lt;/span>: __MODULE__]) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>start_link(__MODULE__, args, opts)
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> terminate(_, _) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>clear_callback()
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
+&lt;/span>&lt;span style="color:#e6db74"> This is the `:heart` callback entrypoint
+&lt;/span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> heart(pid \\ __MODULE__) &lt;span style="color:#66d9ef">do&lt;/span>
+safe_call(pid, &lt;span style="color:#e6db74">:heart&lt;/span>)
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> safe_call(pid, call) &lt;span style="color:#f92672">when&lt;/span> is_pid(pid) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>alive?(pid) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>call(pid, call)
+&lt;span style="color:#66d9ef">catch&lt;/span>
+type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {&lt;span style="color:#e6db74">:error&lt;/span>, {type, error}}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">else&lt;/span>
+{&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:not_alive&lt;/span>}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> safe_call(server, call) &lt;span style="color:#f92672">when&lt;/span> is_atom(server) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#66d9ef">if&lt;/span> pid &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>whereis(server) &lt;span style="color:#66d9ef">do&lt;/span>
+safe_call(pid, call)
+&lt;span style="color:#66d9ef">else&lt;/span>
+{&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:no_pid&lt;/span>}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> safe_call(unknown, _call) &lt;span style="color:#66d9ef">do&lt;/span>
+{&lt;span style="color:#e6db74">:error&lt;/span>, {&lt;span style="color:#e6db74">:unknown&lt;/span>, unknown}}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> init(args) &lt;span style="color:#66d9ef">do&lt;/span>
+nerves_hub_timeout &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Keyword&lt;/span>&lt;span style="color:#f92672">.&lt;/span>get(args, &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span>)
+nerves_hub_timeout_timer &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>send_after(self(), &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, nerves_hub_timeout)
+&lt;span style="color:#75715e"># Add other timers here in the same format&lt;/span>
+{&lt;span style="color:#e6db74">:ok&lt;/span>,
+%{
+&lt;span style="color:#e6db74">timers&lt;/span>: %{
+&lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: nerves_hub_timeout_timer,
+}
+}}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> handle_call(&lt;span style="color:#e6db74">:heart&lt;/span>, _from, state) &lt;span style="color:#66d9ef">do&lt;/span>
+timers &lt;span style="color:#f92672">=&lt;/span>
+&lt;span style="color:#a6e22e">Map&lt;/span>&lt;span style="color:#f92672">.&lt;/span>new(state&lt;span style="color:#f92672">.&lt;/span>timers, &lt;span style="color:#66d9ef">fn&lt;/span>
+{name, &lt;span style="color:#e6db74">:ok&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, &lt;span style="color:#e6db74">:ok&lt;/span>}
+{name, timer} &lt;span style="color:#f92672">when&lt;/span> is_reference(timer) &lt;span style="color:#f92672">-&amp;gt;&lt;/span> evaluate_timer(name, timer)
+{name, value} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, value}
+&lt;span style="color:#66d9ef">end&lt;/span>)
+state &lt;span style="color:#f92672">=&lt;/span> %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: timers}
+failed &lt;span style="color:#f92672">=&lt;/span>
+&lt;span style="color:#a6e22e">Enum&lt;/span>&lt;span style="color:#f92672">.&lt;/span>any?(timers, &lt;span style="color:#66d9ef">fn&lt;/span>
+{_name, &lt;span style="color:#66d9ef">true&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
+{_name, _result} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
+&lt;span style="color:#66d9ef">end&lt;/span>)
+&lt;span style="color:#66d9ef">if&lt;/span> failed &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Heart callback failed. Firmware will revert soon&amp;#34;&lt;/span>)
+{&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:fail&lt;/span>, state}
+&lt;span style="color:#66d9ef">else&lt;/span>
+&lt;span style="color:#75715e"># all checks passed&lt;/span>
+{&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>, state}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:initialize_heart&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(__MODULE__, &lt;span style="color:#e6db74">:heart&lt;/span>)
+{&lt;span style="color:#e6db74">:noreply&lt;/span>, state}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>warn(&lt;span style="color:#e6db74">&amp;#34;Timeout connecting to NervesHub. Firmware should not be considered valid&amp;#34;&lt;/span>)
+{&lt;span style="color:#e6db74">:noreply&lt;/span>, %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: %{state&lt;span style="color:#f92672">.&lt;/span>timers &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>}}}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#75715e"># Timer already expired&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(name, &lt;span style="color:#66d9ef">true&lt;/span>) &lt;span style="color:#66d9ef">do&lt;/span>
+{name, &lt;span style="color:#66d9ef">true&lt;/span>}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">NervesHubLink&lt;/span>&lt;span style="color:#f92672">.&lt;/span>connected?() &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>cancel_timer(timer)
+&lt;span style="color:#75715e"># this is what we&amp;#39;ve all been waiting for!&lt;/span>
+&lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_firmware()
+{&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>}
+&lt;span style="color:#66d9ef">else&lt;/span>
+{&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">catch&lt;/span>
+type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span>
+&lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Failed to check nerves_hub_timeout: &lt;/span>&lt;span style="color:#e6db74">#{&lt;/span>inspect({type, error})&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+{&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="why-when-and-how">Why, When and How&lt;/h1>
+&lt;p>With Nerves, you get this fancy A/B partition scheme. You can think of it as
+analogous to blue/green deploys of web applications. How this works internally
+is subject for another post as it differes per device. In the case of this post,
+all you will need to know is that if we don&amp;rsquo;t call a special function, upon the
+next reboot, the device will revert to it&amp;rsquo;s previous firmware.&lt;/p>
+&lt;h2 id="why-have-a-system-to-auto-revert-firmware">Why have a system to auto revert firmware?&lt;/h2>
+&lt;p>To start out, it may be useful to understand &lt;em>why&lt;/em> this setup exists. Imagine if
+you will, you have a fleet of devices in production. What they do is not important,
+but if you&amp;rsquo;re creative, you may pretend they do something cool. If you&amp;rsquo;re not creative,
+just assume that a broken firmware means you have to personally go out and fix any device
+personally. This is your motivation.&lt;/p>
+&lt;p>The general idea is that if your device is online, and able to download a new update,
+it&amp;rsquo;s in a &amp;ldquo;valid&amp;rdquo; state. Say the device is on firmware &lt;code>A&lt;/code>. It was the first version of
+the firmware you wrote. It has bugs, but those aren&amp;rsquo;t important as you can just fix them
+with an update. Firmware &lt;code>A&lt;/code> is good enough to get you connected to a central Firmware
+Update Server. (say for example &lt;a href="https://nerves-hub.org">Nerves Hub&lt;/a>)
+Since this was the first firmware, it&amp;rsquo;s automatically considered &lt;code>valid&lt;/code>.
+Now that firmware &lt;code>A&lt;/code> is deployed to your fleet of devices, you &lt;strong>really&lt;/strong> don&amp;rsquo;t want
+an update to break them. This is where the auto revert system comes in. When you
+finally get around to fixing those bugs, you can use the Firmware Update Server
+to dispatch your update to the devices, but you want to be really sure that they
+are at least as not broken as they started out before the update.&lt;/p>
+&lt;p>When an update is downloaded, it will be applied to the &lt;code>B&lt;/code> partition, and the device
+will attempt to boot from that partition after the update completes. When it does,
+there are some conditions that need to be met before considering the new firmware
+as &lt;code>valid&lt;/code>.&lt;/p>
+&lt;h2 id="when-is-a-firmware-considered-valid">When is a firmware considered valid?&lt;/h2>
+&lt;p>The short answer is of course it depends.&lt;/p>
+&lt;p>The short answer that is probably most useful to you is that if your devices can
+receive further updates, it&amp;rsquo;s what i like to call &lt;code>valid enough&lt;/code>.&lt;/p>
+&lt;p>The long answer is as follows:&lt;/p>
+&lt;p>You ultimately need to decide what makes your firmware &lt;code>valid&lt;/code>. The code provided in
+the above example simply assumes that connecting to NervesHub is what makes it &lt;code>valid&lt;/code>.
+Your use case will probably differ depending on what the device does. For example,
+some common other checks include connecting to your own networks, APIs etc.&lt;/p>
+&lt;p>If your device connects to your Firmware Update Server, but doesn&amp;rsquo;t perform it&amp;rsquo;s
+core functionality, maybe that shouldn&amp;rsquo;t be considered &lt;code>valid&lt;/code>.&lt;/p>
+&lt;h1 id="how-to-validate-a-firmware">How to validate a firmware?&lt;/h1>
+&lt;p>Naturally, the answer to this question is it depends yet again. However, the example
+above is of course already implemented, so that&amp;rsquo;s &lt;code>how&lt;/code> you&amp;rsquo;re gonna do it. The point
+here is that this is not the &lt;strong>only&lt;/strong> way to validate a firmware. It&amp;rsquo;s just one I
+and at least a couple other production projects work.&lt;/p>
+&lt;p>The main system we will be working with here is called &lt;code>heart&lt;/code>. It&amp;rsquo;s an
+underappreciated system in the Erlang Runtime System with almost no documentation.
+(as is customary for the most useful parts of ERTS)&lt;/p>
+&lt;p>What you need to know is that there&amp;rsquo;s a module called &lt;code>:heart&lt;/code> that gets started very early
+in the boot process. Nerves implements a custom process (&lt;a href="https://github.com/nerves-project/nerves_heart">source&lt;/a>)
+to keep &lt;code>:heart&lt;/code> and your devices watchdog in sync. This means that if Erlang (read: your firmware)
+or the device watchdog becomes unresponsive, the device will reboot. The special part about
+that, is that if your firmware was not validated, the reboot will revert back to the last
+valid firmware, protecting you, the developer from having to fix devices manually.&lt;/p>
+&lt;p>So how do you use it? there are a couple functions you will need to know about. The glue between
+them is really up to you, but the example at the beginning provides a basic implementation
+you can use and modify to suit your own needs.&lt;/p>
+&lt;p>The first useful function is &lt;code>:heart.set_callback/2&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(&lt;span style="color:#a6e22e">SomeModuleThatKnowsHowToValidateFirmware&lt;/span>, &lt;span style="color:#e6db74">:function_to_call&lt;/span>)
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This callback will be called every &lt;code>HEART_BEAT_TIMEOUT&lt;/code>. By default this is once
+every 60 seconds.&lt;/p>
+&lt;p>The other useful function you will need is &lt;code>Nerves.Runtime.validate_fw/0&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_fw()
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the above example, we wrap both of these functions up inside a GenServer
+process. this process will be started during our firmware&amp;rsquo;s application supervision
+tree startup. I put it at the very end so that firmware can only be validated if everything
+else is &amp;ldquo;up and running&amp;rdquo; whatever that means for the application.
+That process schedules some timers that once expired will consider the firmware &amp;ldquo;invalid&amp;rdquo;.
+The whole trick here is that your device will not be connected immediately since the network
+takes time to come up. The timer essentially says that&lt;/p>
+&lt;pre>&lt;code>upon a reboot, if the device hasn't connected to the firmware update server in
+the allowed amount of time (5 minutes in this case), the firmware should be reverted.
+&lt;/code>&lt;/pre>
+&lt;p>The other thing to note here is that any crash, exception, error etc will be considered a failure.
+(and cause a reboot) This means you should think about how the process interacts and introspects the
+rest of the system.&lt;/p>
+&lt;h1 id="conclusion">Conclusion&lt;/h1>
+&lt;p>Hopefully this at least gets you thinking about how to recover from failure &lt;strong>before&lt;/strong>
+you end up failing with no escape route.&lt;/p>
+&lt;p>Deploying firmware to production devices has quite a few things like this that you may not
+even be considering. Stay tuned for more on deploying your firmware to production&lt;/p></content></item></channel></rss>
