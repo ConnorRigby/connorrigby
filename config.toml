@@ -1,4 +1,4 @@
-baseURL = 'https://connorrigby.github.io/connorrigby/'
+baseURL = 'https://cone.codes/'
 languageCode = 'en-us'
 title = 'Useful snippits you wont ever remember'
 theme = "terminal"
@@ -54,7 +54,7 @@ paginate = 5
 [languages]
   [languages.en]
     languageName = "English"
-    title = "Cone's Dev stuff"
+    title = "cone.codes"
     subtitle = "Uninteresting snippits from a computer toucher"
     owner = "Connor Rigby"
     keywords = ""
@@ -68,5 +68,5 @@ paginate = 5
     missingBackButtonLabel = "Back to home page"
 
     [languages.en.params.logo]
-      logoText = "Cone's Dev stuff"
+      logoText = "cone.codes"
       logoHomeLink = "/connorrigby"
