@@ -1,0 +1,258 @@
+<!doctype html><html lang=en>
+<head>
+<title>IEx in a Box :: cone.codes</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="A handy Elixir console that can easily be embedded into your application">
+<meta name=keywords content="console,nerves">
+<meta name=robots content="noodp">
+<link rel=canonical href=https://cone.codes/posts/iex-in-a-box/>
+<link rel=stylesheet href=https://cone.codes/assets/style.css>
+<link rel=stylesheet href=https://cone.codes/assets/pink.css>
+<link rel=apple-touch-icon href=https://cone.codes/img/apple-touch-icon-192x192.png>
+<link rel="shortcut icon" href=https://cone.codes/img/favicon/pink.png>
+<meta name=twitter:card content="summary">
+<meta name=twitter:site content="https://connorrigby.github.io/connorrigby/">
+<meta name=twitter:creator content="@PressY4Pie">
+<meta property="og:locale" content="en">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IEx in a Box">
+<meta property="og:description" content="A handy Elixir console that can easily be embedded into your application">
+<meta property="og:url" content="https://cone.codes/posts/iex-in-a-box/">
+<meta property="og:site_name" content="cone.codes">
+<meta property="og:image" content="https://cone.codes/img/favicon/pink.png">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+<meta property="article:published_time" content="2022-01-19 14:23:02 -0700 -0700">
+</head>
+<body class=pink>
+<div class="container full headings--one-size">
+<header class=header>
+<div class=header__inner>
+<div class=header__logo>
+<a href=/>
+<div class=logo>
+cone.codes
+</div>
+</a>
+</div>
+</div>
+</header>
+<div class=content>
+<div class=post>
+<h1 class=post-title>
+<a href=https://cone.codes/posts/iex-in-a-box/>IEx in a Box</a></h1>
+<div class=post-meta>
+<span class=post-date>
+2022-01-19
+</span>
+<span class=post-author>:: Connot Rigby</span>
+</div>
+<span class=post-tags>
+#<a href=https://cone.codes/tags/elixir/>elixir</a>&nbsp;
+#<a href=https://cone.codes/tags/nerves/>nerves</a>&nbsp;
+</span>
+<div class=post-content><div>
+<h1 id=tldr>TLDR<a href=#tldr class=hanchor arialabel=Anchor>&#8983;</a> </h1>
+<p>Here&rsquo;s the code you probably want. Modify it as you see fit.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=color:#75715e># filename: lib/my_firmware/endpoint.ex</span>
+<span style=color:#66d9ef>defmodule</span> <span style=color:#a6e22e>MyFirmware.Endpoint</span> <span style=color:#66d9ef>do</span>
+  <span style=color:#f92672>use</span> <span style=color:#a6e22e>Plug.Router</span>
+  plug(<span style=color:#a6e22e>Plug.Static</span>, <span style=color:#e6db74>from</span>: <span style=color:#e6db74>:my_firmware</span>, <span style=color:#e6db74>at</span>: <span style=color:#e6db74>&#34;/public&#34;</span>)
+
+  plug(<span style=color:#e6db74>:match</span>)
+  plug(<span style=color:#e6db74>:dispatch</span>)
+
+  get <span style=color:#e6db74>&#34;/console&#34;</span> <span style=color:#66d9ef>do</span>
+    html <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;&#34;&#34;
+</span><span style=color:#e6db74>    &lt;!DOCTYPE html PUBLIC&#34;-//W3C//DTD XHTML 1.0 Strict//EN&#34; &#34;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&#34;&gt;
+</span><span style=color:#e6db74>    &lt;html xmlns=&#34;http://www.w3.org/1999/xhtml&#34;&gt;
+</span><span style=color:#e6db74>      &lt;head&gt;
+</span><span style=color:#e6db74>        &lt;meta content=&#34;text/html;charset=utf-8&#34; http-equiv=&#34;Content-Type&#34;&gt;
+</span><span style=color:#e6db74>        &lt;meta content=&#34;utf-8&#34; http-equiv=&#34;encoding&#34;&gt;
+</span><span style=color:#e6db74>        &lt;link rel=&#34;stylesheet&#34; href=&#34;/public/app.css&#34;&gt;
+</span><span style=color:#e6db74>      &lt;/head&gt;
+</span><span style=color:#e6db74>      &lt;body&gt;
+</span><span style=color:#e6db74>        &lt;div id=&#34;terminal&#34;&gt;&lt;/div&gt;
+</span><span style=color:#e6db74>        &lt;script src=&#34;/public/app.js&#34;&gt;&lt;/script&gt;
+</span><span style=color:#e6db74>      &lt;/body&gt;
+</span><span style=color:#e6db74>    &lt;/html&gt;
+</span><span style=color:#e6db74>    &#34;&#34;&#34;</span>
+    send_resp(conn, <span style=color:#ae81ff>200</span>, html)
+  <span style=color:#66d9ef>end</span>
+
+  match _ <span style=color:#66d9ef>do</span>
+    send_resp(conn, <span style=color:#ae81ff>404</span>, <span style=color:#e6db74>&#34;not found&#34;</span>)
+  <span style=color:#66d9ef>end</span>
+<span style=color:#66d9ef>end</span>
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=color:#75715e># filename: lib/my_firmware/console_socket.ex</span>
+<span style=color:#66d9ef>defmodule</span> <span style=color:#a6e22e>MyFirmware.ConsoleSocket</span> <span style=color:#66d9ef>do</span>
+  <span style=color:#a6e22e>@moduledoc</span> <span style=color:#e6db74>&#34;&#34;&#34;
+</span><span style=color:#e6db74>  Simple Websocket handler that starts an embedded iex console
+</span><span style=color:#e6db74>  &#34;&#34;&#34;</span>
+
+  <span style=color:#75715e># Tells the compiler we implement the `cowboy_websocket`</span>
+  <span style=color:#75715e># behaviour. This will give warnings if our</span>
+  <span style=color:#75715e># return types are notably incorrect or if we forget to implement a function.</span>
+  <span style=color:#75715e># FUN FACT: when you `use MyAppWeb, :channel` in your normal Phoenix channel</span>
+  <span style=color:#75715e>#           implementations, this is done under the hood for you.</span>
+  <span style=color:#a6e22e>@behaviour</span> <span style=color:#e6db74>:cowboy_websocket</span>
+
+  <span style=color:#75715e># entry point of the websocket socket.</span>
+  <span style=color:#75715e># WARNING: this is where you would need to do any authentication</span>
+  <span style=color:#75715e>#          and authorization. Since this handler is invoked BEFORE</span>
+  <span style=color:#75715e>#          our Phoenix router, it will NOT follow your pipelines defined there.</span>
+  <span style=color:#75715e>#</span>
+  <span style=color:#75715e># WARNING: this function is NOT called in the same process context as the rest of the functions</span>
+  <span style=color:#75715e>#          defined in this module. This is notably dissimilar to other gen_* behaviours.</span>
+  <span style=color:#a6e22e>@impl</span> <span style=color:#e6db74>:cowboy_websocket</span>
+  <span style=color:#66d9ef>def</span> init(req, opts), <span style=color:#e6db74>do</span>: {<span style=color:#e6db74>:cowboy_websocket</span>, req, opts}
+
+  <span style=color:#75715e># as long as `init/2` returned `{:cowboy_websocket, req, opts}`</span>
+  <span style=color:#75715e># this function will be called. You can begin sending packets at this point.</span>
+  <span style=color:#75715e># We&#39;ll look at how to do that in the `websocket_handle` function however.</span>
+  <span style=color:#75715e># This function is where you might want to  implement `Phoenix.Presence`, schedule an `after_join` message etc.</span>
+  <span style=color:#a6e22e>@impl</span> <span style=color:#e6db74>:cowboy_websocket</span>
+  <span style=color:#66d9ef>def</span> websocket_init(_) <span style=color:#66d9ef>do</span>
+    {<span style=color:#e6db74>:ok</span>, tty} <span style=color:#f92672>=</span> <span style=color:#a6e22e>ExTTY</span><span style=color:#f92672>.</span>start_link([<span style=color:#e6db74>handler</span>: self()])
+    {[], %{<span style=color:#e6db74>tty</span>: tty}}
+  <span style=color:#66d9ef>end</span>
+
+  <span style=color:#75715e># `websocket_handle` is where data from a client will be received.</span>
+  <span style=color:#75715e># a `frame` will be delivered in one of a few shapes depending on what the client sent:</span>
+  <span style=color:#75715e>#</span>
+  <span style=color:#75715e>#     :ping</span>
+  <span style=color:#75715e>#     :pong</span>
+  <span style=color:#75715e>#     {:text, data}</span>
+  <span style=color:#75715e>#     {:binary, data}</span>
+  <span style=color:#75715e>#</span>
+  <span style=color:#75715e># Similarly, the return value of this function is similar:</span>
+  <span style=color:#75715e>#</span>
+  <span style=color:#75715e>#     {[reply_frame1, reply_frame2, ....], state}</span>
+  <span style=color:#75715e>#</span>
+  <span style=color:#75715e># where `reply_frame` is the same format as what is delivered.</span>
+  <span style=color:#a6e22e>@impl</span> <span style=color:#e6db74>:cowboy_websocket</span>
+  <span style=color:#66d9ef>def</span> websocket_handle(frame, state)
+
+  <span style=color:#75715e># :ping is not handled for us like in Phoenix Channels.</span>
+  <span style=color:#75715e># We must explicitly send :pong messages back.</span>
+  <span style=color:#66d9ef>def</span> websocket_handle(<span style=color:#e6db74>:ping</span>, state), <span style=color:#e6db74>do</span>: {[<span style=color:#e6db74>:pong</span>], state}
+
+  <span style=color:#75715e># a message was delivered from a client. Here we handle it by just echoing it back</span>
+  <span style=color:#75715e># to the client.</span>
+  <span style=color:#66d9ef>def</span> websocket_handle({<span style=color:#e6db74>:text</span>, message}, state) <span style=color:#66d9ef>do</span>
+    <span style=color:#a6e22e>ExTTY</span><span style=color:#f92672>.</span>send_text(state<span style=color:#f92672>.</span>tty, message)
+    {[], state}
+  <span style=color:#66d9ef>end</span>
+
+  <span style=color:#75715e># This function is where we will process all *other* messages that get delivered to the</span>
+  <span style=color:#75715e># process mailbox. This function isn&#39;t used in this handler.</span>
+  <span style=color:#a6e22e>@impl</span> <span style=color:#e6db74>:cowboy_websocket</span>
+  <span style=color:#66d9ef>def</span> websocket_info(info, state)
+
+  <span style=color:#66d9ef>def</span> websocket_info({<span style=color:#e6db74>:tty_data</span>, data}, state) <span style=color:#66d9ef>do</span>
+    {[{<span style=color:#e6db74>:text</span>, data}], state}
+  <span style=color:#66d9ef>end</span>
+<span style=color:#66d9ef>end</span>
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=color:#75715e>// filename: priv/static/app.js
+</span><span style=color:#75715e></span><span style=color:#66d9ef>import</span> <span style=color:#e6db74>&#34;xterm/css/xterm.css&#34;</span>;
+<span style=color:#66d9ef>import</span> { <span style=color:#a6e22e>Terminal</span> } <span style=color:#a6e22e>from</span> <span style=color:#e6db74>&#39;xterm&#39;</span>;
+window.<span style=color:#a6e22e>onload</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>function</span>() {
+  <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>host</span> <span style=color:#f92672>=</span> window.<span style=color:#a6e22e>location</span>.<span style=color:#a6e22e>hostname</span>;
+  <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>port</span> <span style=color:#f92672>=</span> window.<span style=color:#a6e22e>location</span>.<span style=color:#a6e22e>port</span>;
+  <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>term</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Terminal</span>();
+  <span style=color:#a6e22e>term</span>.<span style=color:#a6e22e>open</span>(document.<span style=color:#a6e22e>getElementById</span>( <span style=color:#e6db74>&#34;terminal&#34;</span> ));
+
+  <span style=color:#75715e>// Create WebSocket connection.
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>socket</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>WebSocket</span>(<span style=color:#e6db74>&#39;ws://&#39;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>host</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#39;:&#39;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>port</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#39;/socket&#39;</span>);
+
+  <span style=color:#75715e>// Connection opened
+</span><span style=color:#75715e></span>  <span style=color:#a6e22e>socket</span>.<span style=color:#a6e22e>addEventListener</span>(<span style=color:#e6db74>&#39;open&#39;</span>, <span style=color:#66d9ef>function</span> (<span style=color:#a6e22e>event</span>) {
+    <span style=color:#a6e22e>term</span>.<span style=color:#a6e22e>onData</span>((<span style=color:#a6e22e>val</span>) =&gt; {
+      <span style=color:#a6e22e>socket</span>.<span style=color:#a6e22e>send</span>(<span style=color:#a6e22e>val</span>);
+    }); 
+  });
+
+  <span style=color:#75715e>// Listen for messages
+</span><span style=color:#75715e></span>  <span style=color:#a6e22e>socket</span>.<span style=color:#a6e22e>addEventListener</span>(<span style=color:#e6db74>&#39;message&#39;</span>, <span style=color:#66d9ef>function</span> (<span style=color:#a6e22e>event</span>) {
+    <span style=color:#a6e22e>term</span>.<span style=color:#a6e22e>write</span>(<span style=color:#a6e22e>event</span>.<span style=color:#a6e22e>data</span>);
+  });
+}
+</code></pre></div><h1 id=embedded-iex-console>Embedded IEx console<a href=#embedded-iex-console class=hanchor arialabel=Anchor>&#8983;</a> </h1>
+<p>In Elixir, one of the handiest things at your disposal as a
+developer and system maintainer is the IEx console. There are
+a million ways to get access to it. You&rsquo;re likely already
+famaliar with the classic</p>
+<pre><code>iex -S mix
+</code></pre>
+<p>You can of course also use Erlang distribution:</p>
+<pre><code>iex -name console@localhost -cookie democookie --remsh app@localhost
+</code></pre>
+<p>But did you know it can also be accessed in other ways? For
+example, you could make the console accessable via SSH. We
+already do this for you with Nerves, you can check that
+out <a href=https://github.com/nerves-project/nerves_ssh>here</a>.</p>
+<p>In this post, I&rsquo;ll describe how to embed your own console. This can be tunneled
+however you want, but the example provided will be tunneled over a standard http server.</p>
+<h2 id=the-building-blocks>The Building Blocks<a href=#the-building-blocks class=hanchor arialabel=Anchor>&#8983;</a> </h2>
+<p>As is customary around these parts, we aren&rsquo;t going to write much code. Just glue it together.
+First up, we&rsquo;ll need a handful of dependencies. Add these to <code>mix.exs</code></p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir>{<span style=color:#e6db74>:plug_cowboy</span>, <span style=color:#e6db74>&#34;~&gt; 2.0&#34;</span>},
+{<span style=color:#e6db74>:extty</span>, <span style=color:#e6db74>&#34;~&gt; 0.2&#34;</span>},
+</code></pre></div><p>I&rsquo;m sure you&rsquo;ve heard of Plug and Cowboy before, but <code>extty</code> may be new to you. In short,
+it&rsquo;s what allows creating a shell so easily. It implements a simple process-based API for
+hosting the IEx console. Full docs can be found <a href=https://github.com/jjcarstens/extty>here</a>.</p>
+<h2 id=the-glue-code>The Glue Code<a href=#the-glue-code class=hanchor arialabel=Anchor>&#8983;</a> </h2>
+<p>Somewhere in your supervision tree, add the following child:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=color:#75715e># filename: lib/application.ex or similar</span>
+{<span style=color:#a6e22e>Plug.Cowboy</span>,
+  <span style=color:#e6db74>scheme</span>: <span style=color:#e6db74>:http</span>,
+  <span style=color:#e6db74>plug</span>: <span style=color:#a6e22e>Elias.Testing.Endpoint</span>,
+  <span style=color:#e6db74>dispatch</span>: dispatch(),
+  <span style=color:#e6db74>options</span>: [
+    <span style=color:#e6db74>port</span>: <span style=color:#ae81ff>4001</span>,
+    <span style=color:#e6db74>dispatch</span>: dispatch()
+  ]
+}
+</code></pre></div><p>And of course, here&rsquo;s that <code>dispatch()</code> function:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=color:#66d9ef>def</span> dispatch <span style=color:#66d9ef>do</span>
+  [
+    {<span style=color:#e6db74>:_</span>,
+      [
+        {<span style=color:#e6db74>&#34;/socket&#34;</span>, <span style=color:#a6e22e>MyFirmware.ConsoleSocket</span>, []},
+        {<span style=color:#e6db74>:_</span>, <span style=color:#a6e22e>Plug.Cowboy.Handler</span>, {<span style=color:#a6e22e>MyFirmware.Endpoint</span>, []}}
+      ]}
+  ]
+<span style=color:#66d9ef>end</span>
+</code></pre></div><p>After putting it all together you should see:</p>
+<p><img src=/iex-in-a-box/iex-console.png alt=iex-console></p>
+</div></div>
+<div class=pagination>
+<div class=pagination__title>
+<span class=pagination__title-h>Read other posts</span>
+<hr>
+</div>
+<div class=pagination__buttons>
+<span class="button next">
+<a href=https://cone.codes/posts/auto-validate-nerves-firmware/>
+<span class=button__text>Automtatically Validating Nerves Firmware</span>
+<span class=button__icon>→</span>
+</a>
+</span>
+</div>
+</div>
+</div>
+</div>
+<footer class=footer>
+<div class=footer__inner>
+<div class="copyright copyright--user">
+<span>Creative Commons Attribution 4.0 International</span>
+<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span>
+</div>
+</div>
+</footer>
+<script src=https://cone.codes/assets/main.js></script>
+<script src=https://cone.codes/assets/prism.js></script>
+</div>
+</body>
+</html>
