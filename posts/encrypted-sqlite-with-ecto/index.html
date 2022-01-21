@@ -3,8 +3,7 @@
 <title>Encrypted SQLite With Ecto :: cone.codes</title>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=description content="TLDR Compiling SQLCipher:
-./configure \  --enable-tempstore=yes \  --disable-tcl \  --enable-shared \  CFLAGS=&amp;#34;-DSQLITE_HAS_CODEC -DSQLITE_THREADSAFE=1 -DSQLITE_USE_URI=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS=1 -DSQLITE_DQS=0 -DHAVE_USLEEP=1 -DALLOW_COVERING_INDEX_SCAN=1 -DENABLE_FTS3_PARENTHESIS=1 -DENABLE_LOAD_EXTENSION=1 -DENABLE_SOUNDEX=1 -DENABLE_STAT4=1 -DENABLE_UPDATE_DELETE_LIMIT=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_ENABLE_GEOPOLY=1 -DSQLITE_ENABLE_JSON1=1 -DSQLITE_ENABLE_MATH_FUNCTIONS=1 -DSQLITE_ENABLE_RBU=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_OMIT_DEPRECATED=1&amp;#34; \  LDFLAGS=&amp;#34;-lcrypto&amp;#34; Encrypting SQLite databases SQLite is one of my favorite pieces of software in the world. It&amp;rsquo;s used in millions of projects and devices. One issue with the official public version of it is that there is no support for encryption natively.">
+<meta name=description content="Database level encryption backed by SQLCipher">
 <meta name=keywords content="elixir,database,encryption">
 <meta name=robots content="noodp">
 <link rel=canonical href=https://cone.codes/posts/encrypted-sqlite-with-ecto/>
@@ -18,8 +17,7 @@
 <meta property="og:locale" content="en">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Encrypted SQLite With Ecto">
-<meta property="og:description" content="TLDR Compiling SQLCipher:
-./configure \  --enable-tempstore=yes \  --disable-tcl \  --enable-shared \  CFLAGS=&amp;#34;-DSQLITE_HAS_CODEC -DSQLITE_THREADSAFE=1 -DSQLITE_USE_URI=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS=1 -DSQLITE_DQS=0 -DHAVE_USLEEP=1 -DALLOW_COVERING_INDEX_SCAN=1 -DENABLE_FTS3_PARENTHESIS=1 -DENABLE_LOAD_EXTENSION=1 -DENABLE_SOUNDEX=1 -DENABLE_STAT4=1 -DENABLE_UPDATE_DELETE_LIMIT=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_ENABLE_GEOPOLY=1 -DSQLITE_ENABLE_JSON1=1 -DSQLITE_ENABLE_MATH_FUNCTIONS=1 -DSQLITE_ENABLE_RBU=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_OMIT_DEPRECATED=1&amp;#34; \  LDFLAGS=&amp;#34;-lcrypto&amp;#34; Encrypting SQLite databases SQLite is one of my favorite pieces of software in the world. It&amp;rsquo;s used in millions of projects and devices. One issue with the official public version of it is that there is no support for encryption natively.">
+<meta property="og:description" content="Database level encryption backed by SQLCipher">
 <meta property="og:url" content="https://cone.codes/posts/encrypted-sqlite-with-ecto/">
 <meta property="og:site_name" content="cone.codes">
 <meta property="og:image" content="https://cone.codes/">
