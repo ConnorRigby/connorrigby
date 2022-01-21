@@ -1,0 +1,161 @@
+<!doctype html><html lang=en>
+<head>
+<title>Encrypted SQLite With Ecto :: cone.codes</title>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta name=description content="TLDR Compiling SQLCipher:
+./configure \  --enable-tempstore=yes \  --disable-tcl \  --enable-shared \  CFLAGS=&amp;#34;-DSQLITE_HAS_CODEC -DSQLITE_THREADSAFE=1 -DSQLITE_USE_URI=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS=1 -DSQLITE_DQS=0 -DHAVE_USLEEP=1 -DALLOW_COVERING_INDEX_SCAN=1 -DENABLE_FTS3_PARENTHESIS=1 -DENABLE_LOAD_EXTENSION=1 -DENABLE_SOUNDEX=1 -DENABLE_STAT4=1 -DENABLE_UPDATE_DELETE_LIMIT=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_ENABLE_GEOPOLY=1 -DSQLITE_ENABLE_JSON1=1 -DSQLITE_ENABLE_MATH_FUNCTIONS=1 -DSQLITE_ENABLE_RBU=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_OMIT_DEPRECATED=1&amp;#34; \  LDFLAGS=&amp;#34;-lcrypto&amp;#34; Encrypting SQLite databases SQLite is one of my favorite pieces of software in the world. It&amp;rsquo;s used in millions of projects and devices. One issue with the official public version of it is that there is no support for encryption natively.">
+<meta name=keywords content="elixir,database,encryption">
+<meta name=robots content="noodp">
+<link rel=canonical href=https://cone.codes/posts/encrypted-sqlite-with-ecto/>
+<link rel=stylesheet href=https://cone.codes/assets/style.css>
+<link rel=stylesheet href=https://cone.codes/assets/pink.css>
+<link rel=apple-touch-icon href=https://cone.codes/img/apple-touch-icon-192x192.png>
+<link rel="shortcut icon" href=https://cone.codes/img/favicon/pink.png>
+<meta name=twitter:card content="summary">
+<meta name=twitter:site content="https://connorrigby.github.io/connorrigby/">
+<meta name=twitter:creator content="PressY4Pie">
+<meta property="og:locale" content="en">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Encrypted SQLite With Ecto">
+<meta property="og:description" content="TLDR Compiling SQLCipher:
+./configure \  --enable-tempstore=yes \  --disable-tcl \  --enable-shared \  CFLAGS=&amp;#34;-DSQLITE_HAS_CODEC -DSQLITE_THREADSAFE=1 -DSQLITE_USE_URI=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS=1 -DSQLITE_DQS=0 -DHAVE_USLEEP=1 -DALLOW_COVERING_INDEX_SCAN=1 -DENABLE_FTS3_PARENTHESIS=1 -DENABLE_LOAD_EXTENSION=1 -DENABLE_SOUNDEX=1 -DENABLE_STAT4=1 -DENABLE_UPDATE_DELETE_LIMIT=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_ENABLE_GEOPOLY=1 -DSQLITE_ENABLE_JSON1=1 -DSQLITE_ENABLE_MATH_FUNCTIONS=1 -DSQLITE_ENABLE_RBU=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_OMIT_DEPRECATED=1&amp;#34; \  LDFLAGS=&amp;#34;-lcrypto&amp;#34; Encrypting SQLite databases SQLite is one of my favorite pieces of software in the world. It&amp;rsquo;s used in millions of projects and devices. One issue with the official public version of it is that there is no support for encryption natively.">
+<meta property="og:url" content="https://cone.codes/posts/encrypted-sqlite-with-ecto/">
+<meta property="og:site_name" content="cone.codes">
+<meta property="og:image" content="https://cone.codes/">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+<meta property="article:published_time" content="2022-01-21 14:36:40 -0700 -0700">
+</head>
+<body class=pink>
+<div class="container full headings--one-size">
+<header class=header>
+<div class=header__inner>
+<div class=header__logo>
+<a href=/>
+<div class=logo>
+cone.codes
+</div>
+</a>
+</div>
+</div>
+</header>
+<div class=content>
+<div class=post>
+<h1 class=post-title>
+<a href=https://cone.codes/posts/encrypted-sqlite-with-ecto/>Encrypted SQLite With Ecto</a></h1>
+<div class=post-meta>
+<span class=post-date>
+2022-01-21
+</span>
+<span class=post-author>:: Connor Rigby</span>
+</div>
+<span class=post-tags>
+#<a href=https://cone.codes/tags/elixir/>elixir</a>&nbsp;
+#<a href=https://cone.codes/tags/ecto/>ecto</a>&nbsp;
+#<a href=https://cone.codes/tags/sqlite/>sqlite</a>&nbsp;
+</span>
+<div class=post-content><div>
+<h1 id=tldr>TLDR<a href=#tldr class=hanchor arialabel=Anchor>&#8983;</a> </h1>
+<p>Compiling SQLCipher:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>./configure <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  --enable-tempstore<span style=color:#f92672>=</span>yes <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  --disable-tcl <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  --enable-shared <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  CFLAGS<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;-DSQLITE_HAS_CODEC -DSQLITE_THREADSAFE=1 -DSQLITE_USE_URI=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS=1 -DSQLITE_DQS=0 -DHAVE_USLEEP=1 -DALLOW_COVERING_INDEX_SCAN=1 -DENABLE_FTS3_PARENTHESIS=1 -DENABLE_LOAD_EXTENSION=1 -DENABLE_SOUNDEX=1 -DENABLE_STAT4=1 -DENABLE_UPDATE_DELETE_LIMIT=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_ENABLE_GEOPOLY=1 -DSQLITE_ENABLE_JSON1=1 -DSQLITE_ENABLE_MATH_FUNCTIONS=1 -DSQLITE_ENABLE_RBU=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_OMIT_DEPRECATED=1&#34;</span> <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  LDFLAGS<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;-lcrypto&#34;</span>
+</code></pre></div><h1 id=encrypting-sqlite-databases>Encrypting SQLite databases<a href=#encrypting-sqlite-databases class=hanchor arialabel=Anchor>&#8983;</a> </h1>
+<p>SQLite is one of my favorite pieces of software in the world. It&rsquo;s used in millions
+of projects and devices. One issue with the official public version of it is that
+there is no support for encryption natively. The primary decision for this seems to be
+for monetizing the work of the developers.</p>
+<p>What this means is that to encrypt your SQLite database, you actually have to recompile
+the entire engine from source, with licensed files. You can read more about the
+official SQLite encryption <a href=https://www.sqlite.org/see/doc/trunk/www/readme.wiki>on the official website</a></p>
+<p>An alternative option to SQLite encryption that is free and open source is <a href=https://www.zetetic.net/sqlcipher/>SQLCipher</a>.
+It implements a similar API and to the offical SEE release, and also requires you to compile the engine from source.</p>
+<h2 id=compiling-sqlcipher>Compiling SQLCipher<a href=#compiling-sqlcipher class=hanchor arialabel=Anchor>&#8983;</a> </h2>
+<p>This is the most time consuming part of the process. Luckily it only needs to be done once.</p>
+<pre><code>NOTE: this is specifically for your development environment. Compiling for production 
+      *may* look the same to you, but it may not. This is specifically a problem for Nerves
+      which I will write a follow-up post about in the future.
+</code></pre>
+<p>The first step for compiling SQLCipher is getting the source. I chose to use the latest tagged release,
+a git clone will work the same.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>wget https://github.com/sqlcipher/sqlcipher/archive/refs/tags/v4.5.0.tar.gz
+tar xzf v4.5.0.tar.gz
+cd sqlcipher-4.5.0
+</code></pre></div><p>Next up, use autotools to configure the build. These are the settings I suggest starting with:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>./configure <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  --enable-tempstore<span style=color:#f92672>=</span>yes <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  --disable-tcl <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  --enable-shared <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  CFLAGS<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;-DSQLITE_HAS_CODEC -DSQLITE_THREADSAFE=1 -DSQLITE_USE_URI=1 -DSQLITE_LIKE_DOESNT_MATCH_BLOBS=1 -DSQLITE_DQS=0 -DHAVE_USLEEP=1 -DALLOW_COVERING_INDEX_SCAN=1 -DENABLE_FTS3_PARENTHESIS=1 -DENABLE_LOAD_EXTENSION=1 -DENABLE_SOUNDEX=1 -DENABLE_STAT4=1 -DENABLE_UPDATE_DELETE_LIMIT=1 -DSQLITE_ENABLE_FTS3=1 -DSQLITE_ENABLE_FTS4=1 -DSQLITE_ENABLE_FTS5=1 -DSQLITE_ENABLE_GEOPOLY=1 -DSQLITE_ENABLE_JSON1=1 -DSQLITE_ENABLE_MATH_FUNCTIONS=1 -DSQLITE_ENABLE_RBU=1 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_OMIT_DEPRECATED=1&#34;</span> <span style=color:#ae81ff>\
+</span><span style=color:#ae81ff></span>  LDFLAGS<span style=color:#f92672>=</span><span style=color:#e6db74>&#34;-lcrypto&#34;</span>
+</code></pre></div><p>And finally, you just need to:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>make
+<span style=color:#75715e># May require root permissions</span>
+make install
+</code></pre></div><h2 id=setup-with-ecto>Setup with Ecto<a href=#setup-with-ecto class=hanchor arialabel=Anchor>&#8983;</a> </h2>
+<p>Right before this post went live, I submitted two PRs to the Elixir SQLite driver:</p>
+<ul>
+<li><a href=https://github.com/elixir-sqlite/exqlite/pull/186>https://github.com/elixir-sqlite/exqlite/pull/186</a></li>
+<li><a href=https://github.com/elixir-sqlite/exqlite/pull/187>https://github.com/elixir-sqlite/exqlite/pull/187</a></li>
+</ul>
+<p>The first allows for using externally compiled SQLite engine. This is required to use our
+previously compiled SQLCipher engine.</p>
+<p>The second allows for setting the <code>KEY</code> PRAGMA value. This is what SQLite SEE and SQLCipher
+both use to decrypt data. It must be supplied before <em>any</em> of the SQLite database will be
+accessable.</p>
+<p>To have access to these new features, you will need to update to the latest version of <code>exqlite</code>.
+Add <code>{:exqlite "~> 0.9"}</code> to your project, or simply update it with:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>mix deps.update exqlite
+</code></pre></div><p>To get <code>exqlite</code> to use our SQLCipher installation, you need to export a handful of environment variables:</p>
+<pre tabindex=0><code># tell exqlite that we wish to use some other sqlite installation. this will prevent sqlite3.c and friends from compiling
+export EXQLITE_USE_SYSTEM=1
+
+# Tell exqlite where to find the `sqlite3.h` file
+export EXQLITE_SYSTEM_CFLAGS=-I/usr/local/include/sqlcipher
+
+# tell exqlite which sqlite implementation to use
+export EXQLITE_SYSTEM_LDFLAGS=-L/usr/local/lib -lsqlcipher
+</code></pre><p>do a recompile with:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash>mix deps.compile exqlite --force
+</code></pre></div><p>Almost done, the only other thing you have to do is supply a <code>key</code> to the config. In <code>config.exs</code> you can do something like:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir>config <span style=color:#e6db74>:my_app</span>,
+  <span style=color:#e6db74>ecto_repos</span>: [<span style=color:#a6e22e>MyApp.Repo</span>]
+
+config <span style=color:#e6db74>:my_app</span>, <span style=color:#a6e22e>MyApp.Repo</span>,
+  <span style=color:#e6db74>database</span>: <span style=color:#e6db74>&#34;path/to/my/database.db&#34;</span>,
+  <span style=color:#e6db74>key</span>: <span style=color:#e6db74>&#34;test123&#34;</span> <span style=color:#75715e># add this line</span>
+</code></pre></div><p>And that&rsquo;s it! Your data is now encrypted using the key provided.</p>
+</div></div>
+<div class=pagination>
+<div class=pagination__title>
+<span class=pagination__title-h>Read other posts</span>
+<hr>
+</div>
+<div class=pagination__buttons>
+<span class="button next">
+<a href=https://cone.codes/posts/linux-hx711/>
+<span class=button__text>Using HX711 with Linux</span>
+<span class=button__icon>→</span>
+</a>
+</span>
+</div>
+</div>
+</div>
+</div>
+<footer class=footer>
+<div class=footer__inner>
+<div class="copyright copyright--user">
+<span>Creative Commons Attribution 4.0 International</span>
+<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span>
+</div>
+</div>
+</footer>
+<script src=https://cone.codes/assets/main.js></script>
+<script src=https://cone.codes/assets/prism.js></script>
+</div>
+</body>
+</html>
