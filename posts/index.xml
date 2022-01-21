@@ -1,4 +1,86 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on cone.codes</title><link>https://cone.codes/posts/</link><description>Recent content in Posts on cone.codes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>Creative Commons Attribution 4.0 International</copyright><lastBuildDate>Wed, 19 Jan 2022 14:23:02 -0700</lastBuildDate><atom:link href="https://cone.codes/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>IEx in a Box</title><link>https://cone.codes/posts/iex-in-a-box/</link><pubDate>Wed, 19 Jan 2022 14:23:02 -0700</pubDate><guid>https://cone.codes/posts/iex-in-a-box/</guid><description>TLDR Here&amp;rsquo;s the code you probably want. Modify it as you see fit.
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on cone.codes</title><link>https://cone.codes/posts/</link><description>Recent content in Posts on cone.codes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>Creative Commons Attribution 4.0 International</copyright><lastBuildDate>Thu, 20 Jan 2022 16:24:27 -0700</lastBuildDate><atom:link href="https://cone.codes/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Using HX711 with Linux</title><link>https://cone.codes/posts/linux-hx711/</link><pubDate>Thu, 20 Jan 2022 16:24:27 -0700</pubDate><guid>https://cone.codes/posts/linux-hx711/</guid><description>TLDR Here&amp;rsquo;s the code you probably want. Modify it as you see fit.
+loadcell_en_reg: fixedregulator@3 { compatible = &amp;#34;regulator-fixed&amp;#34;; regulator-name = &amp;#34;loadcell-en-regulator&amp;#34;; regulator-min-microvolt = &amp;lt;3300000&amp;gt;; regulator-max-microvolt = &amp;lt;3300000&amp;gt;; /* ADC_PWR_EN */ gpio = &amp;lt;&amp;amp;gpio1 13 0&amp;gt;; enable-active-high; }; hx711: hx711 { compatible = &amp;#34;avia,hx711&amp;#34;; sck-gpios = &amp;lt;&amp;amp;gpio1 14 GPIO_ACTIVE_HIGH&amp;gt;; dout-gpios = &amp;lt;&amp;amp;gpio1 15 GPIO_ACTIVE_HIGH&amp;gt;; avdd-supply = &amp;lt;&amp;amp;loadcell_en_reg&amp;gt;; }; $ cat /sys/bus/iio/devices/iio:device2/in_voltage0_raw 6818404 Using HX711 from Linux The HX711 is a really common device, most commonly used to measure weight via a load cell.</description><content>&lt;h1 id="tldr">TLDR&lt;/h1>
+&lt;p>Here&amp;rsquo;s the code you probably want. Modify it as you see fit.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">loadcell_en_reg: fixedregulator&lt;span style="color:#960050;background-color:#1e0010">@&lt;/span>&lt;span style="color:#ae81ff">3&lt;/span> {
+compatible &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;regulator-fixed&amp;#34;&lt;/span>;
+regulator&lt;span style="color:#f92672">-&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;loadcell-en-regulator&amp;#34;&lt;/span>;
+regulator&lt;span style="color:#f92672">-&lt;/span>min&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+regulator&lt;span style="color:#f92672">-&lt;/span>max&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;span style="color:#75715e">/* ADC_PWR_EN */&lt;/span>
+gpio &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">13&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+enable&lt;span style="color:#f92672">-&lt;/span>active&lt;span style="color:#f92672">-&lt;/span>high;
+};
+hx711: hx711 {
+compatible &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;avia,hx711&amp;#34;&lt;/span>;
+sck&lt;span style="color:#f92672">-&lt;/span>gpios &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">14&lt;/span> GPIO_ACTIVE_HIGH&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+dout&lt;span style="color:#f92672">-&lt;/span>gpios &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">15&lt;/span> GPIO_ACTIVE_HIGH&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+avdd&lt;span style="color:#f92672">-&lt;/span>supply &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>loadcell_en_reg&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+};
+&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ cat /sys/bus/iio/devices/iio:device2/in_voltage0_raw
+&lt;span style="color:#ae81ff">6818404&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="using-hx711-from-linux">Using HX711 from Linux&lt;/h1>
+&lt;p>The HX711 is a really common device, most commonly used to
+measure weight via a load cell. It uses a simple 2 wire interface
+with a clock and signal. It&amp;rsquo;s not a standard protocol, but simple
+anyway.&lt;/p>
+&lt;p>You can find devboards at &lt;a href="https://www.sparkfun.com/products/13879">SparkFun&lt;/a>.
+You will also probably need a load cell, which can also be found
+at &lt;a href="https://www.sparkfun.com/products/13329">SparkFun&lt;/a>.&lt;/p>
+&lt;p>There are a ton of implementations out there for using this particular
+device:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://www.arduino.cc/reference/en/libraries/hx711-arduino-library/">Arduino&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/tatobari/hx711py">Python&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.npmjs.com/package/hx711">Javscript&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>But for embedded Linux, none of these are particulary suitable.
+Luckily, there is a Linux Kernel Module available for that use
+case. &lt;a href="https://github.com/torvalds/linux/blob/master/drivers/iio/adc/hx711.c">Source&lt;/a>&lt;/p>
+&lt;p>Unfortunately, as is common with these sorts of devices in Linux, there is almost
+no documentation for it besides the
+&lt;a href="https://lore.kernel.org/lkml/20170105175156.GA12221@andreas/">Kernel patch&amp;rsquo;s original submission&lt;/a>
+and a small blurb in the &lt;a href="https://elixir.bootlin.com/linux/v5.1-rc5/source/Documentation/devicetree/bindings/iio/adc/avia-hx711.txt">Device Tree&lt;/a>.&lt;/p>
+&lt;p>By the way, there&amp;rsquo;s a typo in the above document. Don&amp;rsquo;t spend an entire work day
+figuring that out like me.&lt;/p>
+&lt;h2 id="enable-the-kernel-module">Enable the Kernel Module&lt;/h2>
+&lt;p>To use this device with Linux, the first thing you will need to do is enable the
+kernel module. The name of the module is &lt;code>CONFIG_HX711&lt;/code>. You can enable it
+in the &lt;code>make menuconfig&lt;/code> menu. Use &lt;code>/&lt;/code> to search for it.&lt;/p>
+&lt;h2 id="configure-the-device-tree">Configure the Device Tree&lt;/h2>
+&lt;p>This is the hardest part for me to getting this device working was setting up the
+Device tree. The first section has the code required, but I&amp;rsquo;ll walk thru the parts
+that held me up.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c"> avdd&lt;span style="color:#f92672">-&lt;/span>supply &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>loadcell_en_reg&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This was probably the single most time consuming part of the entire project. In my particular
+case, the regulator is external too my system regulator.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">loadcell_en_reg: fixedregulator&lt;span style="color:#960050;background-color:#1e0010">@&lt;/span>&lt;span style="color:#ae81ff">3&lt;/span> {
+compatible &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;regulator-fixed&amp;#34;&lt;/span>;
+regulator&lt;span style="color:#f92672">-&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;loadcell-en-regulator&amp;#34;&lt;/span>;
+regulator&lt;span style="color:#f92672">-&lt;/span>min&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+regulator&lt;span style="color:#f92672">-&lt;/span>max&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;span style="color:#75715e">/* ADC_PWR_EN */&lt;/span>
+gpio &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">13&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+enable&lt;span style="color:#f92672">-&lt;/span>active&lt;span style="color:#f92672">-&lt;/span>high;
+};
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>This looks pretty simple now that I know what everything does. The trick was finding out
+I needed a &lt;code>regulator-fixed&lt;/code> device. I spent a lot of time trying to get a different node
+functioning: &lt;a href="https://www.kernel.org/doc/Documentation/devicetree/bindings/regulator/gpio-regulator.txt">regulator-gpio&lt;/a>.
+My thought process being&lt;/p>
+&lt;blockquote>
+&lt;p>I have a regulator, it&amp;rsquo;s enabled by gpio, therefor I must want &lt;code>gpio regulator&lt;/code>.&lt;/p>
+&lt;/blockquote>
+&lt;p>This turned out to be false, and &lt;code>regulator-fixed&lt;/code> itself actually supports using
+&lt;code>gpio&lt;/code> to enable it.&lt;/p>
+&lt;h2 id="getting-data-from-the-hx711">Getting Data from the HX711&lt;/h2>
+&lt;p>The module uses the &lt;a href="https://www.kernel.org/doc/html/v5.4/driver-api/iio/index.html">&lt;code>iio&lt;/code>&lt;/a>
+subsystem. That document was a little overwealming to me, so here&amp;rsquo;s the cheat codes:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">/sys/bus/iio/devices/iio:device2/in_voltage0_raw
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="calibration">Calibration&lt;/h2>
+&lt;p>Read that file, it will give you the voltage from the device. This value will need
+to be calibrated in userspace as documented by the original author of the driver.
+This varries depending on which load cell you have and how your device is positioned in
+the real world. I may update this post in the future with how i calibrate the device, for
+now you probably want to consult the &lt;a href="https://cdn.sparkfun.com/assets/learn_tutorials/5/4/6/hx711F_EN.pdf">Datasheet&lt;/a>.&lt;/p></content></item><item><title>IEx in a Box</title><link>https://cone.codes/posts/iex-in-a-box/</link><pubDate>Wed, 19 Jan 2022 14:23:02 -0700</pubDate><guid>https://cone.codes/posts/iex-in-a-box/</guid><description>TLDR Here&amp;rsquo;s the code you probably want. Modify it as you see fit.
 # filename: lib/my_firmware/endpoint.ex defmodule MyFirmware.Endpoint do use Plug.Router plug(Plug.Static, from: :my_firmware, at: &amp;#34;/public&amp;#34;) plug(:match) plug(:dispatch) get &amp;#34;/console&amp;#34; do html = &amp;#34;&amp;#34;&amp;#34; &amp;lt;!DOCTYPE html PUBLIC&amp;#34;-//W3C//DTD XHTML 1.0 Strict//EN&amp;#34; &amp;#34;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&amp;#34;&amp;gt; &amp;lt;html xmlns=&amp;#34;http://www.w3.org/1999/xhtml&amp;#34;&amp;gt; &amp;lt;head&amp;gt; &amp;lt;meta content=&amp;#34;text/html;charset=utf-8&amp;#34; http-equiv=&amp;#34;Content-Type&amp;#34;&amp;gt; &amp;lt;meta content=&amp;#34;utf-8&amp;#34; http-equiv=&amp;#34;encoding&amp;#34;&amp;gt; &amp;lt;link rel=&amp;#34;stylesheet&amp;#34; href=&amp;#34;/public/app.css&amp;#34;&amp;gt; &amp;lt;/head&amp;gt; &amp;lt;body&amp;gt; &amp;lt;div id=&amp;#34;terminal&amp;#34;&amp;gt;&amp;lt;/div&amp;gt; &amp;lt;script src=&amp;#34;/public/app.js&amp;#34;&amp;gt;&amp;lt;/script&amp;gt; &amp;lt;/body&amp;gt; &amp;lt;/html&amp;gt; &amp;#34;&amp;#34;&amp;#34; send_resp(conn, 200, html) end match _ do send_resp(conn, 404, &amp;#34;not found&amp;#34;) end end # filename: lib/my_firmware/console_socket.</description><content>&lt;h1 id="tldr">TLDR&lt;/h1>
 &lt;p>Here&amp;rsquo;s the code you probably want. Modify it as you see fit.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#75715e"># filename: lib/my_firmware/endpoint.ex&lt;/span>
