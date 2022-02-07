@@ -17,8 +17,9 @@ to Nerves and related projects.
 
 * [Nerves](https://github.com/nerves-project/) - Build embedded Linux Firmware with Elixir 
 * [Nerves Hub](https://github.com/nerves-project/) - Remote central firmware update server for Nerves
-* [Vintage Net](https://github.com/nerves-networking/) - Linux Networking library for Elixcir
+* [Vintage Net](https://github.com/nerves-networking/) - Linux Networking library for Elixir
 * [Blue Heron](https://github.com/blue-heron/) - BLE library for Elixir
+* [YourBot](https://github.com/YourBotIs/) - Experimental Discord Bot deployment platform (co developed with [Gulci](https://github.com/Gulci/))
 
 ## Blogs
 
