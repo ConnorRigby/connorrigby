@@ -1,7 +1,7 @@
 +++
 title = "IEx in a Box"
 date = "2022-01-19T14:23:02-07:00"
-author = "Connot Rigby"
+author = "Connor Rigby"
 authorTwitter = "@PressY4Pie" #do not include @
 tags = ["elixir", "nerves"]
 keywords = ["console", "nerves"]
