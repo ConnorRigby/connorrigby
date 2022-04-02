@@ -1,116 +1,214 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>nerves on cone.codes</title><link>https://cone.codes/tags/nerves/</link><description>Recent content in nerves on cone.codes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>Creative Commons Attribution 4.0 International</copyright><lastBuildDate>Wed, 19 Jan 2022 14:23:02 -0700</lastBuildDate><atom:link href="https://cone.codes/tags/nerves/index.xml" rel="self" type="application/rss+xml"/><item><title>IEx in a Box</title><link>https://cone.codes/posts/iex-in-a-box/</link><pubDate>Wed, 19 Jan 2022 14:23:02 -0700</pubDate><guid>https://cone.codes/posts/iex-in-a-box/</guid><description>TLDR Here&amp;rsquo;s the code you probably want. Modify it as you see fit.
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>nerves on cone.codes</title><link>https://cone.codes/tags/nerves/</link><description>Recent content in nerves on cone.codes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>Creative Commons Attribution 4.0 International</copyright><lastBuildDate>Fri, 01 Apr 2022 23:17:51 -0600</lastBuildDate><atom:link href="https://cone.codes/tags/nerves/index.xml" rel="self" type="application/rss+xml"/><item><title>Can Link</title><link>https://cone.codes/posts/can-link/</link><pubDate>Fri, 01 Apr 2022 23:17:51 -0600</pubDate><guid>https://cone.codes/posts/can-link/</guid><description>I&amp;rsquo;ve been working on an idea off and on for the last year or so, and it&amp;rsquo;s finally culminated into a real thing that exists. What I want is a device that can interface an aftermarket ECU in my car, and mesh network with other nodes to syncronize RGB LEDs. This is of course a silly idea and would not make a real sustainable product or business, but I think it&amp;rsquo;s fun.</description><content>&lt;p>I&amp;rsquo;ve been working on an idea off and on for the last year or so, and it&amp;rsquo;s finally culminated
+into a real thing that exists. What I want is a device that can interface an aftermarket
+&lt;a href="https://en.wikipedia.org/wiki/Electronic_control_unit">ECU&lt;/a> in my car, and mesh network with
+other nodes to syncronize RGB LEDs. This is of course a silly idea and would not make a real
+sustainable product or business, but I think it&amp;rsquo;s fun.&lt;/p>
+&lt;p>Like I said, I&amp;rsquo;ve been working on this for quite a while, so there&amp;rsquo;s quite a bit to catch up
+on. Instead of blabbing about the software (which will be blabbed about in the future), I&amp;rsquo;m
+gonna write up a quick summary of my experience doing an entire PCB &amp;ldquo;from scratch&amp;rdquo;, since that&amp;rsquo;s
+the most recent portion of the project I&amp;rsquo;ve completed.&lt;/p>
+&lt;h2 id="designing-pcb-for-nerves-firmware">Designing PCB for Nerves Firmware&lt;/h2>
+&lt;p>I picked the BeagleBoneBlue as my development board because it had &lt;em>almost&lt;/em> all the stuff I
+wanted for the final design. It also uses the &lt;a href="https://octavosystems.com/octavo_products/osd335x/">OSD335x&lt;/a> CPU, which is a very well supported device in the Nerves world. I
+use it for my current work product, I&amp;rsquo;ve worked with other companies using Nerves that use it,
+etc.&lt;/p>
+&lt;p>The first step (after making a prototype ofc) was to make the schematic. Another reason I picked
+this devboard was beause of how simple it is. The entire schematic is 5 pages long, and fits
+into a single PDF. &lt;a href="https://github.com/beagleboard/beaglebone-blue/blob/9812bd927a0157a0a326debb858e36678e6eed64/BeagleBone_Blue_sch.pdf">Here it is&lt;/a>.
+I &lt;a href="https://github.com/miata-bot/can-link/commit/69d136ebbe92c61059c85afc6919afc3817271a1">tricked a friend of mine into importing it into kicad&lt;/a> for me, then got to modifying it.&lt;/p>
+&lt;h2 id="the-schematic">The Schematic&lt;/h2>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/958716169408352256/unknown.png?width=2160&amp;amp;height=864" alt="schematic">&lt;/p>
+&lt;p>The easy part was removing things I didn&amp;rsquo;t need:&lt;/p>
+&lt;ul>
+&lt;li>EMMC - I plan on using an SD card for this. It&amp;rsquo;s just easier.&lt;/li>
+&lt;li>GPIO connectors - I wanted to keep these, but routing was just too hard for me.&lt;/li>
+&lt;li>Motor controllers - No motor to control&lt;/li>
+&lt;/ul>
+&lt;p>Next up was to change out some parts:&lt;/p>
+&lt;ul>
+&lt;li>Barrel jack changed for a somewhat standard connector used by many aftermarket ECUs.&lt;/li>
+&lt;li>USB Mini changed out for a USB C connector - this port is used for firmware debugging&lt;/li>
+&lt;li>USB A changed out for USB B - this port is used for a mass storage gadget&lt;/li>
+&lt;li>Battery connector changed out for one that I happen to have.&lt;/li>
+&lt;li>Changed all the passives out for bigger packages. This was because I&amp;rsquo;m hand soldering it.&lt;/li>
+&lt;/ul>
+&lt;p>And finally I added some parts:&lt;/p>
+&lt;ul>
+&lt;li>JST connector for GPS modules&lt;/li>
+&lt;li>3 Mosfets - used for PWMing the RGB LEDs&lt;/li>
+&lt;li>RF69 Packet radio - used for syncing devices without internet&lt;/li>
+&lt;li>TAG Connect serial console - used for firmware debugging&lt;/li>
+&lt;/ul>
+&lt;p>And that&amp;rsquo;s it. Pretty much everything else was a standard BeagleBone Blue. I moved some pins
+during routing after consulting the datasheet.&lt;/p>
+&lt;h2 id="the-layout">The Layout&lt;/h2>
+&lt;p>After the schematic was mostly together, next up was to lay all the components out. I picked 0603 and 0805 size packages for everything, and laid all the components on the top side. I&amp;rsquo;m no expert so anyone with real experience in Electrical Engineering will probably have something to say. I guess here is a good place to put: if you, the reader use this for something and it doesn&amp;rsquo;t work; sorry and also I&amp;rsquo;m not responsible for whatever happens.&lt;/p>
+&lt;p>I started out with just plopping everything down.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/958094663275925524/unknown.png" alt="layout">.&lt;/p>
+&lt;p>The first goal was to make sure I have 3d models for every part. I know it seems overkill, but it
+just helps me with part placement to be able to visualize things. Kicad&amp;rsquo;s 3d viewer is pretty good once you get the models loaded. If you don&amp;rsquo;t do this, you really should.&lt;/p>
+&lt;p>Next I sorted the components out into their respective &amp;ldquo;systems&amp;rdquo;. Decoupling caps per device, pullup/pulldown resistors in some sort of structure, power components, radio, connectors etc.
+The goal here is to make sure there&amp;rsquo;s room on the board for everything and to start thinking of everything in relationship to the other components. A good layout here is going to pay off later when it comes to routing.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/958814194273243146/unknown.png" alt="layout-progress">&lt;/p>
+&lt;p>What happens next is sort of non-linear. I pretty much just arbitrarily started pecking around
+the design, juggling parts around into the correct general shape so it can be moved around as a unit. I didn&amp;rsquo;t have an requirements for where anything should go, which was sort of hard for me to reason about, so I just started assembling sections into blocks.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/958883714396487722/unknown.png" alt="layout-progress">&lt;/p>
+&lt;p>The general layout started to take place at this point. The WiFi module was laid out and placed permenantly at the edge of the board. The RF69 radio goes right under it.
+Right around this point is when I put some serious thought into how the device should look and
+feel when it exists in the real world. I moved the connectors around, made cardboard boxes in about the same shape, etc. Just to see how it would feel to actually use.&lt;/p>
+&lt;p>Eventually, I decided that the USB and CAN interfaces should be on the right. This is where power
+and CAN signal are provided to the board. Technically, that is all that is required to run the device.&lt;/p>
+&lt;p>&lt;img src="https://cdn.discordapp.com/attachments/643947340453118019/959123883582169098/unknown.png" alt="connectors">&lt;/p>
+&lt;h2 id="the-routing">The Routing&lt;/h2>
+&lt;p>After all the main systems were layed out on the board, it was time to route the board. This is
+the second BGA package I&amp;rsquo;ve fanned out, and this one was far larger than the last. I did what
+I think is an okay job. I&amp;rsquo;m certain it could be improved, and I&amp;rsquo;m sure one day I will think this
+is the worst thing ever. I ended up removing a bunch of extra stuff I wanted, but didn&amp;rsquo;t need.
+Notably, GPIO connectors, extra buttons and extra LEDs. This is the gist of what I came up with for
+fanning the package out.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/959291652126679080/unknown.png" alt="fanout">&lt;/p>
+&lt;p>While working on that, I took breaks to do other sections that could be built independently.
+The WiFi / Bluetooth module was a particularly neat one.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/959184408865284156/unknown.png" alt="bluetooth-layout">&lt;/p>
+&lt;p>Once I got all the tracks out of the BGA, all that was left was to shuffle all the signals
+to where they needed to go. If I were to do it over again, I&amp;rsquo;d move the SD Card over to the right
+side of the board. I originally put the SD Card on the top of the board thinking I could fan the
+MMC pins that direction. I don&amp;rsquo;t remember exactly why i couldn&amp;rsquo;t, but I think it was because
+of the big power pours.&lt;/p>
+&lt;p>This is pretty much the final layout and routing.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/959527063302307960/unknown.png" alt="final-layout-routing">&lt;/p>
+&lt;p>Lastly, I sprinkled some text, a logo, and connector descriptions onto the silkscreen.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/957852929254113300/959576291563163708/unknown.png" alt="final-pcb-model">&lt;/p>
+&lt;p>And that&amp;rsquo;s pretty much as far as I got this weekend. Next up is to pick out each of the individual components.
+One notable issue with that is there&amp;rsquo;s this whole global chip shortage thing..&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/959626650935517194/unknown.png?width=2160&amp;amp;height=144" alt="chip-shortage">&lt;/p>
+&lt;p>I ordered a few OSD335X chips on Aliexpress. Tune back in next week to see if they show up or not.&lt;/p></content></item><item><title>IEx in a Box</title><link>https://cone.codes/posts/iex-in-a-box/</link><pubDate>Wed, 19 Jan 2022 14:23:02 -0700</pubDate><guid>https://cone.codes/posts/iex-in-a-box/</guid><description>TLDR Here&amp;rsquo;s the code you probably want. Modify it as you see fit.
 # filename: lib/my_firmware/endpoint.ex defmodule MyFirmware.Endpoint do use Plug.Router plug(Plug.Static, from: :my_firmware, at: &amp;#34;/public&amp;#34;) plug(:match) plug(:dispatch) get &amp;#34;/console&amp;#34; do html = &amp;#34;&amp;#34;&amp;#34; &amp;lt;!DOCTYPE html PUBLIC&amp;#34;-//W3C//DTD XHTML 1.0 Strict//EN&amp;#34; &amp;#34;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&amp;#34;&amp;gt; &amp;lt;html xmlns=&amp;#34;http://www.w3.org/1999/xhtml&amp;#34;&amp;gt; &amp;lt;head&amp;gt; &amp;lt;meta content=&amp;#34;text/html;charset=utf-8&amp;#34; http-equiv=&amp;#34;Content-Type&amp;#34;&amp;gt; &amp;lt;meta content=&amp;#34;utf-8&amp;#34; http-equiv=&amp;#34;encoding&amp;#34;&amp;gt; &amp;lt;link rel=&amp;#34;stylesheet&amp;#34; href=&amp;#34;/public/app.css&amp;#34;&amp;gt; &amp;lt;/head&amp;gt; &amp;lt;body&amp;gt; &amp;lt;div id=&amp;#34;terminal&amp;#34;&amp;gt;&amp;lt;/div&amp;gt; &amp;lt;script src=&amp;#34;/public/app.js&amp;#34;&amp;gt;&amp;lt;/script&amp;gt; &amp;lt;/body&amp;gt; &amp;lt;/html&amp;gt; &amp;#34;&amp;#34;&amp;#34; send_resp(conn, 200, html) end match _ do send_resp(conn, 404, &amp;#34;not found&amp;#34;) end end # filename: lib/my_firmware/console_socket.</description><content>&lt;h1 id="tldr">TLDR&lt;/h1>
 &lt;p>Here&amp;rsquo;s the code you probably want. Modify it as you see fit.&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#75715e"># filename: lib/my_firmware/endpoint.ex&lt;/span>
-&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyFirmware.Endpoint&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#f92672">use&lt;/span> &lt;span style="color:#a6e22e">Plug.Router&lt;/span>
-plug(&lt;span style="color:#a6e22e">Plug.Static&lt;/span>, &lt;span style="color:#e6db74">from&lt;/span>: &lt;span style="color:#e6db74">:my_firmware&lt;/span>, &lt;span style="color:#e6db74">at&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;/public&amp;#34;&lt;/span>)
-plug(&lt;span style="color:#e6db74">:match&lt;/span>)
-plug(&lt;span style="color:#e6db74">:dispatch&lt;/span>)
-get &lt;span style="color:#e6db74">&amp;#34;/console&amp;#34;&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
-html &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;!DOCTYPE html PUBLIC&amp;#34;-//W3C//DTD XHTML 1.0 Strict//EN&amp;#34; &amp;#34;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&amp;#34;&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;html xmlns=&amp;#34;http://www.w3.org/1999/xhtml&amp;#34;&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;head&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;meta content=&amp;#34;text/html;charset=utf-8&amp;#34; http-equiv=&amp;#34;Content-Type&amp;#34;&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;meta content=&amp;#34;utf-8&amp;#34; http-equiv=&amp;#34;encoding&amp;#34;&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;link rel=&amp;#34;stylesheet&amp;#34; href=&amp;#34;/public/app.css&amp;#34;&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;/head&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;body&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;div id=&amp;#34;terminal&amp;#34;&amp;gt;&amp;lt;/div&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;script src=&amp;#34;/public/app.js&amp;#34;&amp;gt;&amp;lt;/script&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;/body&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;lt;/html&amp;gt;
-&lt;/span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
-send_resp(conn, &lt;span style="color:#ae81ff">200&lt;/span>, html)
-&lt;span style="color:#66d9ef">end&lt;/span>
-match _ &lt;span style="color:#66d9ef">do&lt;/span>
-send_resp(conn, &lt;span style="color:#ae81ff">404&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;not found&amp;#34;&lt;/span>)
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#75715e"># filename: lib/my_firmware/console_socket.ex&lt;/span>
-&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyFirmware.ConsoleSocket&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">@moduledoc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
-&lt;/span>&lt;span style="color:#e6db74"> Simple Websocket handler that starts an embedded iex console
-&lt;/span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
-&lt;span style="color:#75715e"># Tells the compiler we implement the `cowboy_websocket`&lt;/span>
-&lt;span style="color:#75715e"># behaviour. This will give warnings if our&lt;/span>
-&lt;span style="color:#75715e"># return types are notably incorrect or if we forget to implement a function.&lt;/span>
-&lt;span style="color:#75715e"># FUN FACT: when you `use MyAppWeb, :channel` in your normal Phoenix channel&lt;/span>
-&lt;span style="color:#75715e"># implementations, this is done under the hood for you.&lt;/span>
-&lt;span style="color:#a6e22e">@behaviour&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
-&lt;span style="color:#75715e"># entry point of the websocket socket.&lt;/span>
-&lt;span style="color:#75715e"># WARNING: this is where you would need to do any authentication&lt;/span>
-&lt;span style="color:#75715e"># and authorization. Since this handler is invoked BEFORE&lt;/span>
-&lt;span style="color:#75715e"># our Phoenix router, it will NOT follow your pipelines defined there.&lt;/span>
-&lt;span style="color:#75715e">#&lt;/span>
-&lt;span style="color:#75715e"># WARNING: this function is NOT called in the same process context as the rest of the functions&lt;/span>
-&lt;span style="color:#75715e"># defined in this module. This is notably dissimilar to other gen_* behaviours.&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> init(req, opts), &lt;span style="color:#e6db74">do&lt;/span>: {&lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>, req, opts}
-&lt;span style="color:#75715e"># as long as `init/2` returned `{:cowboy_websocket, req, opts}`&lt;/span>
-&lt;span style="color:#75715e"># this function will be called. You can begin sending packets at this point.&lt;/span>
-&lt;span style="color:#75715e"># We&amp;#39;ll look at how to do that in the `websocket_handle` function however.&lt;/span>
-&lt;span style="color:#75715e"># This function is where you might want to implement `Phoenix.Presence`, schedule an `after_join` message etc.&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> websocket_init(_) &lt;span style="color:#66d9ef">do&lt;/span>
-{&lt;span style="color:#e6db74">:ok&lt;/span>, tty} &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">ExTTY&lt;/span>&lt;span style="color:#f92672">.&lt;/span>start_link([&lt;span style="color:#e6db74">handler&lt;/span>: self()])
-{[], %{&lt;span style="color:#e6db74">tty&lt;/span>: tty}}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#75715e"># `websocket_handle` is where data from a client will be received.&lt;/span>
-&lt;span style="color:#75715e"># a `frame` will be delivered in one of a few shapes depending on what the client sent:&lt;/span>
-&lt;span style="color:#75715e">#&lt;/span>
-&lt;span style="color:#75715e"># :ping&lt;/span>
-&lt;span style="color:#75715e"># :pong&lt;/span>
-&lt;span style="color:#75715e"># {:text, data}&lt;/span>
-&lt;span style="color:#75715e"># {:binary, data}&lt;/span>
-&lt;span style="color:#75715e">#&lt;/span>
-&lt;span style="color:#75715e"># Similarly, the return value of this function is similar:&lt;/span>
-&lt;span style="color:#75715e">#&lt;/span>
-&lt;span style="color:#75715e"># {[reply_frame1, reply_frame2, ....], state}&lt;/span>
-&lt;span style="color:#75715e">#&lt;/span>
-&lt;span style="color:#75715e"># where `reply_frame` is the same format as what is delivered.&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> websocket_handle(frame, state)
-&lt;span style="color:#75715e"># :ping is not handled for us like in Phoenix Channels.&lt;/span>
-&lt;span style="color:#75715e"># We must explicitly send :pong messages back.&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> websocket_handle(&lt;span style="color:#e6db74">:ping&lt;/span>, state), &lt;span style="color:#e6db74">do&lt;/span>: {[&lt;span style="color:#e6db74">:pong&lt;/span>], state}
-&lt;span style="color:#75715e"># a message was delivered from a client. Here we handle it by just echoing it back&lt;/span>
-&lt;span style="color:#75715e"># to the client.&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> websocket_handle({&lt;span style="color:#e6db74">:text&lt;/span>, message}, state) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">ExTTY&lt;/span>&lt;span style="color:#f92672">.&lt;/span>send_text(state&lt;span style="color:#f92672">.&lt;/span>tty, message)
-{[], state}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#75715e"># This function is where we will process all *other* messages that get delivered to the&lt;/span>
-&lt;span style="color:#75715e"># process mailbox. This function isn&amp;#39;t used in this handler.&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> websocket_info(info, state)
-&lt;span style="color:#66d9ef">def&lt;/span> websocket_info({&lt;span style="color:#e6db74">:tty_data&lt;/span>, data}, state) &lt;span style="color:#66d9ef">do&lt;/span>
-{[{&lt;span style="color:#e6db74">:text&lt;/span>, data}], state}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="color:#75715e">// filename: priv/static/app.js
-&lt;/span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#34;xterm/css/xterm.css&amp;#34;&lt;/span>;
-&lt;span style="color:#66d9ef">import&lt;/span> { &lt;span style="color:#a6e22e">Terminal&lt;/span> } &lt;span style="color:#a6e22e">from&lt;/span> &lt;span style="color:#e6db74">&amp;#39;xterm&amp;#39;&lt;/span>;
-window.&lt;span style="color:#a6e22e">onload&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">function&lt;/span>() {
-&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">host&lt;/span> &lt;span style="color:#f92672">=&lt;/span> window.&lt;span style="color:#a6e22e">location&lt;/span>.&lt;span style="color:#a6e22e">hostname&lt;/span>;
-&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">port&lt;/span> &lt;span style="color:#f92672">=&lt;/span> window.&lt;span style="color:#a6e22e">location&lt;/span>.&lt;span style="color:#a6e22e">port&lt;/span>;
-&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">term&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">Terminal&lt;/span>();
-&lt;span style="color:#a6e22e">term&lt;/span>.&lt;span style="color:#a6e22e">open&lt;/span>(document.&lt;span style="color:#a6e22e">getElementById&lt;/span>( &lt;span style="color:#e6db74">&amp;#34;terminal&amp;#34;&lt;/span> ));
-&lt;span style="color:#75715e">// Create WebSocket connection.
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">socket&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">WebSocket&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;ws://&amp;#39;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#a6e22e">host&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#39;:&amp;#39;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#a6e22e">port&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#39;/socket&amp;#39;&lt;/span>);
-&lt;span style="color:#75715e">// Connection opened
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#a6e22e">socket&lt;/span>.&lt;span style="color:#a6e22e">addEventListener&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;open&amp;#39;&lt;/span>, &lt;span style="color:#66d9ef">function&lt;/span> (&lt;span style="color:#a6e22e">event&lt;/span>) {
-&lt;span style="color:#a6e22e">term&lt;/span>.&lt;span style="color:#a6e22e">onData&lt;/span>((&lt;span style="color:#a6e22e">val&lt;/span>) =&amp;gt; {
-&lt;span style="color:#a6e22e">socket&lt;/span>.&lt;span style="color:#a6e22e">send&lt;/span>(&lt;span style="color:#a6e22e">val&lt;/span>);
-});
-});
-&lt;span style="color:#75715e">// Listen for messages
-&lt;/span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#a6e22e">socket&lt;/span>.&lt;span style="color:#a6e22e">addEventListener&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;message&amp;#39;&lt;/span>, &lt;span style="color:#66d9ef">function&lt;/span> (&lt;span style="color:#a6e22e">event&lt;/span>) {
-&lt;span style="color:#a6e22e">term&lt;/span>.&lt;span style="color:#a6e22e">write&lt;/span>(&lt;span style="color:#a6e22e">event&lt;/span>.&lt;span style="color:#a6e22e">data&lt;/span>);
-});
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="embedded-iex-console">Embedded IEx console&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># filename: lib/my_firmware/endpoint.ex&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyFirmware.Endpoint&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">use&lt;/span> &lt;span style="color:#a6e22e">Plug.Router&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> plug(&lt;span style="color:#a6e22e">Plug.Static&lt;/span>, &lt;span style="color:#e6db74">from&lt;/span>: &lt;span style="color:#e6db74">:my_firmware&lt;/span>, &lt;span style="color:#e6db74">at&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;/public&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> plug(&lt;span style="color:#e6db74">:match&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> plug(&lt;span style="color:#e6db74">:dispatch&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> get &lt;span style="color:#e6db74">&amp;#34;/console&amp;#34;&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> html &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;!DOCTYPE html PUBLIC&amp;#34;-//W3C//DTD XHTML 1.0 Strict//EN&amp;#34; &amp;#34;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;html xmlns=&amp;#34;http://www.w3.org/1999/xhtml&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;head&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;meta content=&amp;#34;text/html;charset=utf-8&amp;#34; http-equiv=&amp;#34;Content-Type&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;meta content=&amp;#34;utf-8&amp;#34; http-equiv=&amp;#34;encoding&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;link rel=&amp;#34;stylesheet&amp;#34; href=&amp;#34;/public/app.css&amp;#34;&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;/head&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;body&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;div id=&amp;#34;terminal&amp;#34;&amp;gt;&amp;lt;/div&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;script src=&amp;#34;/public/app.js&amp;#34;&amp;gt;&amp;lt;/script&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;/body&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;lt;/html&amp;gt;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> send_resp(conn, &lt;span style="color:#ae81ff">200&lt;/span>, html)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> match _ &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> send_resp(conn, &lt;span style="color:#ae81ff">404&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;not found&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># filename: lib/my_firmware/console_socket.ex&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyFirmware.ConsoleSocket&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@moduledoc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> Simple Websocket handler that starts an embedded iex console
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># Tells the compiler we implement the `cowboy_websocket`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># behaviour. This will give warnings if our&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># return types are notably incorrect or if we forget to implement a function.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># FUN FACT: when you `use MyAppWeb, :channel` in your normal Phoenix channel&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># implementations, this is done under the hood for you.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@behaviour&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># entry point of the websocket socket.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># WARNING: this is where you would need to do any authentication&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># and authorization. Since this handler is invoked BEFORE&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># our Phoenix router, it will NOT follow your pipelines defined there.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">#&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># WARNING: this function is NOT called in the same process context as the rest of the functions&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># defined in this module. This is notably dissimilar to other gen_* behaviours.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> init(req, opts), &lt;span style="color:#e6db74">do&lt;/span>: {&lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>, req, opts}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># as long as `init/2` returned `{:cowboy_websocket, req, opts}`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># this function will be called. You can begin sending packets at this point.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># We&amp;#39;ll look at how to do that in the `websocket_handle` function however.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># This function is where you might want to implement `Phoenix.Presence`, schedule an `after_join` message etc.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> websocket_init(_) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:ok&lt;/span>, tty} &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">ExTTY&lt;/span>&lt;span style="color:#f92672">.&lt;/span>start_link([&lt;span style="color:#e6db74">handler&lt;/span>: self()])
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {[], %{&lt;span style="color:#e6db74">tty&lt;/span>: tty}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># `websocket_handle` is where data from a client will be received.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># a `frame` will be delivered in one of a few shapes depending on what the client sent:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">#&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># :ping&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># :pong&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># {:text, data}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># {:binary, data}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">#&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># Similarly, the return value of this function is similar:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">#&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># {[reply_frame1, reply_frame2, ....], state}&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">#&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># where `reply_frame` is the same format as what is delivered.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> websocket_handle(frame, state)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># :ping is not handled for us like in Phoenix Channels.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># We must explicitly send :pong messages back.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> websocket_handle(&lt;span style="color:#e6db74">:ping&lt;/span>, state), &lt;span style="color:#e6db74">do&lt;/span>: {[&lt;span style="color:#e6db74">:pong&lt;/span>], state}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># a message was delivered from a client. Here we handle it by just echoing it back&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># to the client.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> websocket_handle({&lt;span style="color:#e6db74">:text&lt;/span>, message}, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">ExTTY&lt;/span>&lt;span style="color:#f92672">.&lt;/span>send_text(state&lt;span style="color:#f92672">.&lt;/span>tty, message)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {[], state}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># This function is where we will process all *other* messages that get delivered to the&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># process mailbox. This function isn&amp;#39;t used in this handler.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#e6db74">:cowboy_websocket&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> websocket_info(info, state)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> websocket_info({&lt;span style="color:#e6db74">:tty_data&lt;/span>, data}, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {[{&lt;span style="color:#e6db74">:text&lt;/span>, data}], state}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-javascript" data-lang="javascript">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// filename: priv/static/app.js
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>&lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#34;xterm/css/xterm.css&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">import&lt;/span> { &lt;span style="color:#a6e22e">Terminal&lt;/span> } &lt;span style="color:#a6e22e">from&lt;/span> &lt;span style="color:#e6db74">&amp;#39;xterm&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>window.&lt;span style="color:#a6e22e">onload&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">function&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">host&lt;/span> &lt;span style="color:#f92672">=&lt;/span> window.&lt;span style="color:#a6e22e">location&lt;/span>.&lt;span style="color:#a6e22e">hostname&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">port&lt;/span> &lt;span style="color:#f92672">=&lt;/span> window.&lt;span style="color:#a6e22e">location&lt;/span>.&lt;span style="color:#a6e22e">port&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">term&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">Terminal&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">term&lt;/span>.&lt;span style="color:#a6e22e">open&lt;/span>(document.&lt;span style="color:#a6e22e">getElementById&lt;/span>( &lt;span style="color:#e6db74">&amp;#34;terminal&amp;#34;&lt;/span> ));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Create WebSocket connection.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#a6e22e">socket&lt;/span> &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> &lt;span style="color:#a6e22e">WebSocket&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;ws://&amp;#39;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#a6e22e">host&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#39;:&amp;#39;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#a6e22e">port&lt;/span> &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#e6db74">&amp;#39;/socket&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Connection opened
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#a6e22e">socket&lt;/span>.&lt;span style="color:#a6e22e">addEventListener&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;open&amp;#39;&lt;/span>, &lt;span style="color:#66d9ef">function&lt;/span> (&lt;span style="color:#a6e22e">event&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">term&lt;/span>.&lt;span style="color:#a6e22e">onData&lt;/span>((&lt;span style="color:#a6e22e">val&lt;/span>) =&amp;gt; {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">socket&lt;/span>.&lt;span style="color:#a6e22e">send&lt;/span>(&lt;span style="color:#a6e22e">val&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Listen for messages
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#a6e22e">socket&lt;/span>.&lt;span style="color:#a6e22e">addEventListener&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;message&amp;#39;&lt;/span>, &lt;span style="color:#66d9ef">function&lt;/span> (&lt;span style="color:#a6e22e">event&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">term&lt;/span>.&lt;span style="color:#a6e22e">write&lt;/span>(&lt;span style="color:#a6e22e">event&lt;/span>.&lt;span style="color:#a6e22e">data&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="embedded-iex-console">Embedded IEx console&lt;/h1>
 &lt;p>In Elixir, one of the handiest things at your disposal as a
 developer and system maintainer is the IEx console. There are
 a million ways to get access to it. You&amp;rsquo;re likely already
@@ -129,169 +227,188 @@ however you want, but the example provided will be tunneled over a standard http
 &lt;h2 id="the-building-blocks">The Building Blocks&lt;/h2>
 &lt;p>As is customary around these parts, we aren&amp;rsquo;t going to write much code. Just glue it together.
 First up, we&amp;rsquo;ll need a handful of dependencies. Add these to &lt;code>mix.exs&lt;/code>&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">{&lt;span style="color:#e6db74">:plug_cowboy&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;~&amp;gt; 2.0&amp;#34;&lt;/span>},
-{&lt;span style="color:#e6db74">:extty&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;~&amp;gt; 0.2&amp;#34;&lt;/span>},
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>I&amp;rsquo;m sure you&amp;rsquo;ve heard of Plug and Cowboy before, but &lt;code>extty&lt;/code> may be new to you. In short,
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>{&lt;span style="color:#e6db74">:plug_cowboy&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;~&amp;gt; 2.0&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{&lt;span style="color:#e6db74">:extty&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;~&amp;gt; 0.2&amp;#34;&lt;/span>},
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>I&amp;rsquo;m sure you&amp;rsquo;ve heard of Plug and Cowboy before, but &lt;code>extty&lt;/code> may be new to you. In short,
 it&amp;rsquo;s what allows creating a shell so easily. It implements a simple process-based API for
 hosting the IEx console. Full docs can be found &lt;a href="https://github.com/jjcarstens/extty">here&lt;/a>.&lt;/p>
 &lt;h2 id="the-glue-code">The Glue Code&lt;/h2>
 &lt;p>Somewhere in your supervision tree, add the following child:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#75715e"># filename: lib/application.ex or similar&lt;/span>
-{&lt;span style="color:#a6e22e">Plug.Cowboy&lt;/span>,
-&lt;span style="color:#e6db74">scheme&lt;/span>: &lt;span style="color:#e6db74">:http&lt;/span>,
-&lt;span style="color:#e6db74">plug&lt;/span>: &lt;span style="color:#a6e22e">Elias.Testing.Endpoint&lt;/span>,
-&lt;span style="color:#e6db74">dispatch&lt;/span>: dispatch(),
-&lt;span style="color:#e6db74">options&lt;/span>: [
-&lt;span style="color:#e6db74">port&lt;/span>: &lt;span style="color:#ae81ff">4001&lt;/span>,
-&lt;span style="color:#e6db74">dispatch&lt;/span>: dispatch()
-]
-}
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>And of course, here&amp;rsquo;s that &lt;code>dispatch()&lt;/code> function:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#66d9ef">def&lt;/span> dispatch &lt;span style="color:#66d9ef">do&lt;/span>
-[
-{&lt;span style="color:#e6db74">:_&lt;/span>,
-[
-{&lt;span style="color:#e6db74">&amp;#34;/socket&amp;#34;&lt;/span>, &lt;span style="color:#a6e22e">MyFirmware.ConsoleSocket&lt;/span>, []},
-{&lt;span style="color:#e6db74">:_&lt;/span>, &lt;span style="color:#a6e22e">Plug.Cowboy.Handler&lt;/span>, {&lt;span style="color:#a6e22e">MyFirmware.Endpoint&lt;/span>, []}}
-]}
-]
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>After putting it all together you should see:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># filename: lib/application.ex or similar&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{&lt;span style="color:#a6e22e">Plug.Cowboy&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">scheme&lt;/span>: &lt;span style="color:#e6db74">:http&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">plug&lt;/span>: &lt;span style="color:#a6e22e">Elias.Testing.Endpoint&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">dispatch&lt;/span>: dispatch(),
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">options&lt;/span>: [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">port&lt;/span>: &lt;span style="color:#ae81ff">4001&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">dispatch&lt;/span>: dispatch()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>And of course, here&amp;rsquo;s that &lt;code>dispatch()&lt;/code> function:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">def&lt;/span> dispatch &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:_&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> [
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">&amp;#34;/socket&amp;#34;&lt;/span>, &lt;span style="color:#a6e22e">MyFirmware.ConsoleSocket&lt;/span>, []},
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:_&lt;/span>, &lt;span style="color:#a6e22e">Plug.Cowboy.Handler&lt;/span>, {&lt;span style="color:#a6e22e">MyFirmware.Endpoint&lt;/span>, []}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>After putting it all together you should see:&lt;/p>
 &lt;p>&lt;img src="https://cone.codes/iex-in-a-box/iex-console.png" alt="iex-console">&lt;/p></content></item><item><title>Automtatically Validating Nerves Firmware</title><link>https://cone.codes/posts/auto-validate-nerves-firmware/</link><pubDate>Wed, 19 Jan 2022 08:42:31 -0700</pubDate><guid>https://cone.codes/posts/auto-validate-nerves-firmware/</guid><description>TLDR Here&amp;rsquo;s the code you probably want. Modify it as you see fit.
 # Copyright 2022 Connor Rigby # # Licensed under the Apache License, Version 2.0 (the &amp;#34;License&amp;#34;); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at # # http://www.apache.org/licenses/LICENSE-2.0 # # Unless required by applicable law or agreed to in writing, software # distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS, # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</description><content>&lt;h1 id="tldr">TLDR&lt;/h1>
 &lt;p>Here&amp;rsquo;s the code you probably want. Modify it as you see fit.&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#75715e"># Copyright 2022 Connor Rigby&lt;/span>
-&lt;span style="color:#75715e"># &lt;/span>
-&lt;span style="color:#75715e"># Licensed under the Apache License, Version 2.0 (the &amp;#34;License&amp;#34;);&lt;/span>
-&lt;span style="color:#75715e"># you may not use this file except in compliance with the License.&lt;/span>
-&lt;span style="color:#75715e"># You may obtain a copy of the License at&lt;/span>
-&lt;span style="color:#75715e"># &lt;/span>
-&lt;span style="color:#75715e"># http://www.apache.org/licenses/LICENSE-2.0&lt;/span>
-&lt;span style="color:#75715e"># &lt;/span>
-&lt;span style="color:#75715e"># Unless required by applicable law or agreed to in writing, software&lt;/span>
-&lt;span style="color:#75715e"># distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS,&lt;/span>
-&lt;span style="color:#75715e"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&lt;/span>
-&lt;span style="color:#75715e"># See the License for the specific language governing permissions and&lt;/span>
-&lt;span style="color:#75715e"># limitations under the License.&lt;/span>
-&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyFirmware.Validator&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">@moduledoc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
-&lt;/span>&lt;span style="color:#e6db74"> Validates the currently running firmware as soon as
-&lt;/span>&lt;span style="color:#e6db74"> the device connects to NervesHub. This is implemented
-&lt;/span>&lt;span style="color:#e6db74"> via setting a callback in `:heart`.
-&lt;/span>&lt;span style="color:#e6db74">
-&lt;/span>&lt;span style="color:#e6db74"> Validation is implemented by polling certain functions,
-&lt;/span>&lt;span style="color:#e6db74"> namely: `NervesHubLink.connected?()`. It is given
-&lt;/span>&lt;span style="color:#e6db74"> 5 minutes to connect. If it does not connect, the `:heart`
-&lt;/span>&lt;span style="color:#e6db74"> module will reboot the device via `nerves_heart`.
-&lt;/span>&lt;span style="color:#e6db74">
-&lt;/span>&lt;span style="color:#e6db74"> All the code in this module must be **VERY SAFE** a crash
-&lt;/span>&lt;span style="color:#e6db74"> will cause the device to reboot.
-&lt;/span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
-&lt;span style="color:#f92672">use&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#f92672">require&lt;/span> &lt;span style="color:#a6e22e">Logger&lt;/span>
-&lt;span style="color:#75715e"># 5 minutes&lt;/span>
-&lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span> &lt;span style="color:#ae81ff">300_000&lt;/span>
-&lt;span style="color:#75715e"># shoudl be started in a supervisor spec&lt;/span>
-&lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> start_link(args, opts \\ [&lt;span style="color:#e6db74">name&lt;/span>: __MODULE__]) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>start_link(__MODULE__, args, opts)
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> terminate(_, _) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>clear_callback()
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
-&lt;/span>&lt;span style="color:#e6db74"> This is the `:heart` callback entrypoint
-&lt;/span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> heart(pid \\ __MODULE__) &lt;span style="color:#66d9ef">do&lt;/span>
-safe_call(pid, &lt;span style="color:#e6db74">:heart&lt;/span>)
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> safe_call(pid, call) &lt;span style="color:#f92672">when&lt;/span> is_pid(pid) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>alive?(pid) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>call(pid, call)
-&lt;span style="color:#66d9ef">catch&lt;/span>
-type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {&lt;span style="color:#e6db74">:error&lt;/span>, {type, error}}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">else&lt;/span>
-{&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:not_alive&lt;/span>}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> safe_call(server, call) &lt;span style="color:#f92672">when&lt;/span> is_atom(server) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">if&lt;/span> pid &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>whereis(server) &lt;span style="color:#66d9ef">do&lt;/span>
-safe_call(pid, call)
-&lt;span style="color:#66d9ef">else&lt;/span>
-{&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:no_pid&lt;/span>}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> safe_call(unknown, _call) &lt;span style="color:#66d9ef">do&lt;/span>
-{&lt;span style="color:#e6db74">:error&lt;/span>, {&lt;span style="color:#e6db74">:unknown&lt;/span>, unknown}}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> init(args) &lt;span style="color:#66d9ef">do&lt;/span>
-nerves_hub_timeout &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Keyword&lt;/span>&lt;span style="color:#f92672">.&lt;/span>get(args, &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span>)
-nerves_hub_timeout_timer &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>send_after(self(), &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, nerves_hub_timeout)
-&lt;span style="color:#75715e"># Add other timers here in the same format&lt;/span>
-{&lt;span style="color:#e6db74">:ok&lt;/span>,
-%{
-&lt;span style="color:#e6db74">timers&lt;/span>: %{
-&lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: nerves_hub_timeout_timer,
-}
-}}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> handle_call(&lt;span style="color:#e6db74">:heart&lt;/span>, _from, state) &lt;span style="color:#66d9ef">do&lt;/span>
-timers &lt;span style="color:#f92672">=&lt;/span>
-&lt;span style="color:#a6e22e">Map&lt;/span>&lt;span style="color:#f92672">.&lt;/span>new(state&lt;span style="color:#f92672">.&lt;/span>timers, &lt;span style="color:#66d9ef">fn&lt;/span>
-{name, &lt;span style="color:#e6db74">:ok&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, &lt;span style="color:#e6db74">:ok&lt;/span>}
-{name, timer} &lt;span style="color:#f92672">when&lt;/span> is_reference(timer) &lt;span style="color:#f92672">-&amp;gt;&lt;/span> evaluate_timer(name, timer)
-{name, value} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, value}
-&lt;span style="color:#66d9ef">end&lt;/span>)
-state &lt;span style="color:#f92672">=&lt;/span> %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: timers}
-failed &lt;span style="color:#f92672">=&lt;/span>
-&lt;span style="color:#a6e22e">Enum&lt;/span>&lt;span style="color:#f92672">.&lt;/span>any?(timers, &lt;span style="color:#66d9ef">fn&lt;/span>
-{_name, &lt;span style="color:#66d9ef">true&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
-{_name, _result} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>)
-&lt;span style="color:#66d9ef">if&lt;/span> failed &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Heart callback failed. Firmware will revert soon&amp;#34;&lt;/span>)
-{&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:fail&lt;/span>, state}
-&lt;span style="color:#66d9ef">else&lt;/span>
-&lt;span style="color:#75715e"># all checks passed&lt;/span>
-{&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>, state}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:initialize_heart&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(__MODULE__, &lt;span style="color:#e6db74">:heart&lt;/span>)
-{&lt;span style="color:#e6db74">:noreply&lt;/span>, state}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>warn(&lt;span style="color:#e6db74">&amp;#34;Timeout connecting to NervesHub. Firmware should not be considered valid&amp;#34;&lt;/span>)
-{&lt;span style="color:#e6db74">:noreply&lt;/span>, %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: %{state&lt;span style="color:#f92672">.&lt;/span>timers &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>}}}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#75715e"># Timer already expired&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(name, &lt;span style="color:#66d9ef">true&lt;/span>) &lt;span style="color:#66d9ef">do&lt;/span>
-{name, &lt;span style="color:#66d9ef">true&lt;/span>}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">NervesHubLink&lt;/span>&lt;span style="color:#f92672">.&lt;/span>connected?() &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>cancel_timer(timer)
-&lt;span style="color:#75715e"># this is what we&amp;#39;ve all been waiting for!&lt;/span>
-&lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_firmware()
-{&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>}
-&lt;span style="color:#66d9ef">else&lt;/span>
-{&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">catch&lt;/span>
-type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span>
-&lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Failed to check nerves_hub_timeout: &lt;/span>&lt;span style="color:#e6db74">#{&lt;/span>inspect({type, error})&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
-{&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="why-when-and-how">Why, When and How&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Copyright 2022 Connor Rigby&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Licensed under the Apache License, Version 2.0 (the &amp;#34;License&amp;#34;);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># you may not use this file except in compliance with the License.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># You may obtain a copy of the License at&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># http://www.apache.org/licenses/LICENSE-2.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Unless required by applicable law or agreed to in writing, software&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># See the License for the specific language governing permissions and&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># limitations under the License.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyFirmware.Validator&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@moduledoc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> Validates the currently running firmware as soon as
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> the device connects to NervesHub. This is implemented
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> via setting a callback in `:heart`.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> Validation is implemented by polling certain functions,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> namely: `NervesHubLink.connected?()`. It is given
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> 5 minutes to connect. If it does not connect, the `:heart`
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> module will reboot the device via `nerves_heart`.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> All the code in this module must be **VERY SAFE** a crash
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> will cause the device to reboot.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">use&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">require&lt;/span> &lt;span style="color:#a6e22e">Logger&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 5 minutes&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span> &lt;span style="color:#ae81ff">300_000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># shoudl be started in a supervisor spec&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> start_link(args, opts \\ [&lt;span style="color:#e6db74">name&lt;/span>: __MODULE__]) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>start_link(__MODULE__, args, opts)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> terminate(_, _) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>clear_callback()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> This is the `:heart` callback entrypoint
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> heart(pid \\ __MODULE__) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> safe_call(pid, &lt;span style="color:#e6db74">:heart&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> safe_call(pid, call) &lt;span style="color:#f92672">when&lt;/span> is_pid(pid) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>alive?(pid) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>call(pid, call)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">catch&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {&lt;span style="color:#e6db74">:error&lt;/span>, {type, error}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:not_alive&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> safe_call(server, call) &lt;span style="color:#f92672">when&lt;/span> is_atom(server) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> pid &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>whereis(server) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> safe_call(pid, call)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:no_pid&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> safe_call(unknown, _call) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:error&lt;/span>, {&lt;span style="color:#e6db74">:unknown&lt;/span>, unknown}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> init(args) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> nerves_hub_timeout &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Keyword&lt;/span>&lt;span style="color:#f92672">.&lt;/span>get(args, &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> nerves_hub_timeout_timer &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>send_after(self(), &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, nerves_hub_timeout)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># Add other timers here in the same format&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:ok&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> %{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">timers&lt;/span>: %{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: nerves_hub_timeout_timer,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> handle_call(&lt;span style="color:#e6db74">:heart&lt;/span>, _from, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timers &lt;span style="color:#f92672">=&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Map&lt;/span>&lt;span style="color:#f92672">.&lt;/span>new(state&lt;span style="color:#f92672">.&lt;/span>timers, &lt;span style="color:#66d9ef">fn&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {name, &lt;span style="color:#e6db74">:ok&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, &lt;span style="color:#e6db74">:ok&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {name, timer} &lt;span style="color:#f92672">when&lt;/span> is_reference(timer) &lt;span style="color:#f92672">-&amp;gt;&lt;/span> evaluate_timer(name, timer)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {name, value} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, value}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> state &lt;span style="color:#f92672">=&lt;/span> %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: timers}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> failed &lt;span style="color:#f92672">=&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Enum&lt;/span>&lt;span style="color:#f92672">.&lt;/span>any?(timers, &lt;span style="color:#66d9ef">fn&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {_name, &lt;span style="color:#66d9ef">true&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {_name, _result} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> failed &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Heart callback failed. Firmware will revert soon&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:fail&lt;/span>, state}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># all checks passed&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>, state}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:initialize_heart&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(__MODULE__, &lt;span style="color:#e6db74">:heart&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:noreply&lt;/span>, state}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>warn(&lt;span style="color:#e6db74">&amp;#34;Timeout connecting to NervesHub. Firmware should not be considered valid&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:noreply&lt;/span>, %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: %{state&lt;span style="color:#f92672">.&lt;/span>timers &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>}}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># Timer already expired&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(name, &lt;span style="color:#66d9ef">true&lt;/span>) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {name, &lt;span style="color:#66d9ef">true&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">NervesHubLink&lt;/span>&lt;span style="color:#f92672">.&lt;/span>connected?() &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>cancel_timer(timer)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># this is what we&amp;#39;ve all been waiting for!&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_firmware()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">catch&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Failed to check nerves_hub_timeout: &lt;/span>&lt;span style="color:#e6db74">#{&lt;/span>inspect({type, error})&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="why-when-and-how">Why, When and How&lt;/h1>
 &lt;p>With Nerves, you get this fancy A/B partition scheme. You can think of it as
 analogous to blue/green deploys of web applications. How this works internally
 is subject for another post as it differes per device. In the case of this post,
@@ -347,12 +464,12 @@ valid firmware, protecting you, the developer from having to fix devices manuall
 them is really up to you, but the example at the beginning provides a basic implementation
 you can use and modify to suit your own needs.&lt;/p>
 &lt;p>The first useful function is &lt;code>:heart.set_callback/2&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(&lt;span style="color:#a6e22e">SomeModuleThatKnowsHowToValidateFirmware&lt;/span>, &lt;span style="color:#e6db74">:function_to_call&lt;/span>)
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>This callback will be called every &lt;code>HEART_BEAT_TIMEOUT&lt;/code>. By default this is once
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(&lt;span style="color:#a6e22e">SomeModuleThatKnowsHowToValidateFirmware&lt;/span>, &lt;span style="color:#e6db74">:function_to_call&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This callback will be called every &lt;code>HEART_BEAT_TIMEOUT&lt;/code>. By default this is once
 every 60 seconds.&lt;/p>
 &lt;p>The other useful function you will need is &lt;code>Nerves.Runtime.validate_fw/0&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_fw()
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the above example, we wrap both of these functions up inside a GenServer
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_fw()
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the above example, we wrap both of these functions up inside a GenServer
 process. this process will be started during our firmware&amp;rsquo;s application supervision
 tree startup. I put it at the very end so that firmware can only be validated if everything
 else is &amp;ldquo;up and running&amp;rdquo; whatever that means for the application.

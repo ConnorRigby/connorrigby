@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>embedded on cone.codes</title><link>https://cone.codes/tags/embedded/</link><description>Recent content in embedded on cone.codes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>Creative Commons Attribution 4.0 International</copyright><lastBuildDate>Thu, 20 Jan 2022 16:24:27 -0700</lastBuildDate><atom:link href="https://cone.codes/tags/embedded/index.xml" rel="self" type="application/rss+xml"/><item><title>Using HX711 with Linux</title><link>https://cone.codes/posts/linux-hx711/</link><pubDate>Thu, 20 Jan 2022 16:24:27 -0700</pubDate><guid>https://cone.codes/posts/linux-hx711/</guid><description>TLDR Here&amp;rsquo;s the code you probably want. Modify it as you see fit.
 loadcell_en_reg: fixedregulator@3 { compatible = &amp;#34;regulator-fixed&amp;#34;; regulator-name = &amp;#34;loadcell-en-regulator&amp;#34;; regulator-min-microvolt = &amp;lt;3300000&amp;gt;; regulator-max-microvolt = &amp;lt;3300000&amp;gt;; /* ADC_PWR_EN */ gpio = &amp;lt;&amp;amp;gpio1 13 0&amp;gt;; enable-active-high; }; hx711: hx711 { compatible = &amp;#34;avia,hx711&amp;#34;; sck-gpios = &amp;lt;&amp;amp;gpio1 14 GPIO_ACTIVE_HIGH&amp;gt;; dout-gpios = &amp;lt;&amp;amp;gpio1 15 GPIO_ACTIVE_HIGH&amp;gt;; avdd-supply = &amp;lt;&amp;amp;loadcell_en_reg&amp;gt;; }; $ cat /sys/bus/iio/devices/iio:device2/in_voltage0_raw 6818404 Using HX711 from Linux The HX711 is a really common device, most commonly used to measure weight via a load cell.</description><content>&lt;h1 id="tldr">TLDR&lt;/h1>
 &lt;p>Here&amp;rsquo;s the code you probably want. Modify it as you see fit.&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">loadcell_en_reg: fixedregulator&lt;span style="color:#960050;background-color:#1e0010">@&lt;/span>&lt;span style="color:#ae81ff">3&lt;/span> {
-compatible &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;regulator-fixed&amp;#34;&lt;/span>;
-regulator&lt;span style="color:#f92672">-&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;loadcell-en-regulator&amp;#34;&lt;/span>;
-regulator&lt;span style="color:#f92672">-&lt;/span>min&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-regulator&lt;span style="color:#f92672">-&lt;/span>max&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-&lt;span style="color:#75715e">/* ADC_PWR_EN */&lt;/span>
-gpio &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">13&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-enable&lt;span style="color:#f92672">-&lt;/span>active&lt;span style="color:#f92672">-&lt;/span>high;
-};
-hx711: hx711 {
-compatible &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;avia,hx711&amp;#34;&lt;/span>;
-sck&lt;span style="color:#f92672">-&lt;/span>gpios &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">14&lt;/span> GPIO_ACTIVE_HIGH&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-dout&lt;span style="color:#f92672">-&lt;/span>gpios &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">15&lt;/span> GPIO_ACTIVE_HIGH&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-avdd&lt;span style="color:#f92672">-&lt;/span>supply &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>loadcell_en_reg&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-};
-&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ cat /sys/bus/iio/devices/iio:device2/in_voltage0_raw
-&lt;span style="color:#ae81ff">6818404&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="using-hx711-from-linux">Using HX711 from Linux&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-c" data-lang="c">&lt;span style="display:flex;">&lt;span>loadcell_en_reg: fixedregulator&lt;span style="color:#960050;background-color:#1e0010">@&lt;/span>&lt;span style="color:#ae81ff">3&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> compatible &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;regulator-fixed&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> regulator&lt;span style="color:#f92672">-&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;loadcell-en-regulator&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> regulator&lt;span style="color:#f92672">-&lt;/span>min&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> regulator&lt;span style="color:#f92672">-&lt;/span>max&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">/* ADC_PWR_EN */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> gpio &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">13&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> enable&lt;span style="color:#f92672">-&lt;/span>active&lt;span style="color:#f92672">-&lt;/span>high;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>};
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>hx711: hx711 {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> compatible &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;avia,hx711&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> sck&lt;span style="color:#f92672">-&lt;/span>gpios &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">14&lt;/span> GPIO_ACTIVE_HIGH&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> dout&lt;span style="color:#f92672">-&lt;/span>gpios &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">15&lt;/span> GPIO_ACTIVE_HIGH&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> avdd&lt;span style="color:#f92672">-&lt;/span>supply &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>loadcell_en_reg&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>};
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ cat /sys/bus/iio/devices/iio:device2/in_voltage0_raw
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">6818404&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="using-hx711-from-linux">Using HX711 from Linux&lt;/h1>
 &lt;p>The HX711 is a really common device, most commonly used to
 measure weight via a load cell. It uses a simple 2 wire interface
 with a clock and signal. It&amp;rsquo;s not a standard protocol, but simple
@@ -50,19 +52,20 @@ in the &lt;code>make menuconfig&lt;/code> menu. Use &lt;code>/&lt;/code> to sear
 &lt;p>This is the hardest part for me to getting this device working was setting up the
 Device tree. The first section has the code required, but I&amp;rsquo;ll walk thru the parts
 that held me up.&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c"> avdd&lt;span style="color:#f92672">-&lt;/span>supply &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>loadcell_en_reg&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>This was probably the single most time consuming part of the entire project. In my particular
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-c" data-lang="c">&lt;span style="display:flex;">&lt;span> avdd&lt;span style="color:#f92672">-&lt;/span>supply &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>loadcell_en_reg&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This was probably the single most time consuming part of the entire project. In my particular
 case, the regulator is external too my system regulator.&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-c" data-lang="c">loadcell_en_reg: fixedregulator&lt;span style="color:#960050;background-color:#1e0010">@&lt;/span>&lt;span style="color:#ae81ff">3&lt;/span> {
-compatible &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;regulator-fixed&amp;#34;&lt;/span>;
-regulator&lt;span style="color:#f92672">-&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;loadcell-en-regulator&amp;#34;&lt;/span>;
-regulator&lt;span style="color:#f92672">-&lt;/span>min&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-regulator&lt;span style="color:#f92672">-&lt;/span>max&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-&lt;span style="color:#75715e">/* ADC_PWR_EN */&lt;/span>
-gpio &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">13&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
-enable&lt;span style="color:#f92672">-&lt;/span>active&lt;span style="color:#f92672">-&lt;/span>high;
-};
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>This looks pretty simple now that I know what everything does. The trick was finding out
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-c" data-lang="c">&lt;span style="display:flex;">&lt;span>loadcell_en_reg: fixedregulator&lt;span style="color:#960050;background-color:#1e0010">@&lt;/span>&lt;span style="color:#ae81ff">3&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> compatible &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;regulator-fixed&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> regulator&lt;span style="color:#f92672">-&lt;/span>name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;loadcell-en-regulator&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> regulator&lt;span style="color:#f92672">-&lt;/span>min&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> regulator&lt;span style="color:#f92672">-&lt;/span>max&lt;span style="color:#f92672">-&lt;/span>microvolt &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#ae81ff">3300000&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">/* ADC_PWR_EN */&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> gpio &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">&amp;lt;&amp;amp;&lt;/span>gpio1 &lt;span style="color:#ae81ff">13&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> enable&lt;span style="color:#f92672">-&lt;/span>active&lt;span style="color:#f92672">-&lt;/span>high;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>};
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This looks pretty simple now that I know what everything does. The trick was finding out
 I needed a &lt;code>regulator-fixed&lt;/code> device. I spent a lot of time trying to get a different node
 functioning: &lt;a href="https://www.kernel.org/doc/Documentation/devicetree/bindings/regulator/gpio-regulator.txt">regulator-gpio&lt;/a>.
 My thought process being&lt;/p>
@@ -74,8 +77,8 @@ My thought process being&lt;/p>
 &lt;h2 id="getting-data-from-the-hx711">Getting Data from the HX711&lt;/h2>
 &lt;p>The module uses the &lt;a href="https://www.kernel.org/doc/html/v5.4/driver-api/iio/index.html">&lt;code>iio&lt;/code>&lt;/a>
 subsystem. That document was a little overwealming to me, so here&amp;rsquo;s the cheat codes:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">/sys/bus/iio/devices/iio:device2/in_voltage0_raw
-&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="calibration">Calibration&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>/sys/bus/iio/devices/iio:device2/in_voltage0_raw
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="calibration">Calibration&lt;/h2>
 &lt;p>Read that file, it will give you the voltage from the device. This value will need
 to be calibrated in userspace as documented by the original author of the driver.
 This varries depending on which load cell you have and how your device is positioned in
@@ -83,138 +86,157 @@ the real world. I may update this post in the future with how i calibrate the de
 now you probably want to consult the &lt;a href="https://cdn.sparkfun.com/assets/learn_tutorials/5/4/6/hx711F_EN.pdf">Datasheet&lt;/a>.&lt;/p></content></item><item><title>Automtatically Validating Nerves Firmware</title><link>https://cone.codes/posts/auto-validate-nerves-firmware/</link><pubDate>Wed, 19 Jan 2022 08:42:31 -0700</pubDate><guid>https://cone.codes/posts/auto-validate-nerves-firmware/</guid><description>TLDR Here&amp;rsquo;s the code you probably want. Modify it as you see fit.
 # Copyright 2022 Connor Rigby # # Licensed under the Apache License, Version 2.0 (the &amp;#34;License&amp;#34;); # you may not use this file except in compliance with the License. # You may obtain a copy of the License at # # http://www.apache.org/licenses/LICENSE-2.0 # # Unless required by applicable law or agreed to in writing, software # distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS, # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</description><content>&lt;h1 id="tldr">TLDR&lt;/h1>
 &lt;p>Here&amp;rsquo;s the code you probably want. Modify it as you see fit.&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#75715e"># Copyright 2022 Connor Rigby&lt;/span>
-&lt;span style="color:#75715e"># &lt;/span>
-&lt;span style="color:#75715e"># Licensed under the Apache License, Version 2.0 (the &amp;#34;License&amp;#34;);&lt;/span>
-&lt;span style="color:#75715e"># you may not use this file except in compliance with the License.&lt;/span>
-&lt;span style="color:#75715e"># You may obtain a copy of the License at&lt;/span>
-&lt;span style="color:#75715e"># &lt;/span>
-&lt;span style="color:#75715e"># http://www.apache.org/licenses/LICENSE-2.0&lt;/span>
-&lt;span style="color:#75715e"># &lt;/span>
-&lt;span style="color:#75715e"># Unless required by applicable law or agreed to in writing, software&lt;/span>
-&lt;span style="color:#75715e"># distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS,&lt;/span>
-&lt;span style="color:#75715e"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&lt;/span>
-&lt;span style="color:#75715e"># See the License for the specific language governing permissions and&lt;/span>
-&lt;span style="color:#75715e"># limitations under the License.&lt;/span>
-&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyFirmware.Validator&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">@moduledoc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
-&lt;/span>&lt;span style="color:#e6db74"> Validates the currently running firmware as soon as
-&lt;/span>&lt;span style="color:#e6db74"> the device connects to NervesHub. This is implemented
-&lt;/span>&lt;span style="color:#e6db74"> via setting a callback in `:heart`.
-&lt;/span>&lt;span style="color:#e6db74">
-&lt;/span>&lt;span style="color:#e6db74"> Validation is implemented by polling certain functions,
-&lt;/span>&lt;span style="color:#e6db74"> namely: `NervesHubLink.connected?()`. It is given
-&lt;/span>&lt;span style="color:#e6db74"> 5 minutes to connect. If it does not connect, the `:heart`
-&lt;/span>&lt;span style="color:#e6db74"> module will reboot the device via `nerves_heart`.
-&lt;/span>&lt;span style="color:#e6db74">
-&lt;/span>&lt;span style="color:#e6db74"> All the code in this module must be **VERY SAFE** a crash
-&lt;/span>&lt;span style="color:#e6db74"> will cause the device to reboot.
-&lt;/span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
-&lt;span style="color:#f92672">use&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#f92672">require&lt;/span> &lt;span style="color:#a6e22e">Logger&lt;/span>
-&lt;span style="color:#75715e"># 5 minutes&lt;/span>
-&lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span> &lt;span style="color:#ae81ff">300_000&lt;/span>
-&lt;span style="color:#75715e"># shoudl be started in a supervisor spec&lt;/span>
-&lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> start_link(args, opts \\ [&lt;span style="color:#e6db74">name&lt;/span>: __MODULE__]) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>start_link(__MODULE__, args, opts)
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> terminate(_, _) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>clear_callback()
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
-&lt;/span>&lt;span style="color:#e6db74"> This is the `:heart` callback entrypoint
-&lt;/span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> heart(pid \\ __MODULE__) &lt;span style="color:#66d9ef">do&lt;/span>
-safe_call(pid, &lt;span style="color:#e6db74">:heart&lt;/span>)
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> safe_call(pid, call) &lt;span style="color:#f92672">when&lt;/span> is_pid(pid) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>alive?(pid) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>call(pid, call)
-&lt;span style="color:#66d9ef">catch&lt;/span>
-type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {&lt;span style="color:#e6db74">:error&lt;/span>, {type, error}}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">else&lt;/span>
-{&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:not_alive&lt;/span>}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> safe_call(server, call) &lt;span style="color:#f92672">when&lt;/span> is_atom(server) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">if&lt;/span> pid &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>whereis(server) &lt;span style="color:#66d9ef">do&lt;/span>
-safe_call(pid, call)
-&lt;span style="color:#66d9ef">else&lt;/span>
-{&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:no_pid&lt;/span>}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> safe_call(unknown, _call) &lt;span style="color:#66d9ef">do&lt;/span>
-{&lt;span style="color:#e6db74">:error&lt;/span>, {&lt;span style="color:#e6db74">:unknown&lt;/span>, unknown}}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> init(args) &lt;span style="color:#66d9ef">do&lt;/span>
-nerves_hub_timeout &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Keyword&lt;/span>&lt;span style="color:#f92672">.&lt;/span>get(args, &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span>)
-nerves_hub_timeout_timer &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>send_after(self(), &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, nerves_hub_timeout)
-&lt;span style="color:#75715e"># Add other timers here in the same format&lt;/span>
-{&lt;span style="color:#e6db74">:ok&lt;/span>,
-%{
-&lt;span style="color:#e6db74">timers&lt;/span>: %{
-&lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: nerves_hub_timeout_timer,
-}
-}}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> handle_call(&lt;span style="color:#e6db74">:heart&lt;/span>, _from, state) &lt;span style="color:#66d9ef">do&lt;/span>
-timers &lt;span style="color:#f92672">=&lt;/span>
-&lt;span style="color:#a6e22e">Map&lt;/span>&lt;span style="color:#f92672">.&lt;/span>new(state&lt;span style="color:#f92672">.&lt;/span>timers, &lt;span style="color:#66d9ef">fn&lt;/span>
-{name, &lt;span style="color:#e6db74">:ok&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, &lt;span style="color:#e6db74">:ok&lt;/span>}
-{name, timer} &lt;span style="color:#f92672">when&lt;/span> is_reference(timer) &lt;span style="color:#f92672">-&amp;gt;&lt;/span> evaluate_timer(name, timer)
-{name, value} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, value}
-&lt;span style="color:#66d9ef">end&lt;/span>)
-state &lt;span style="color:#f92672">=&lt;/span> %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: timers}
-failed &lt;span style="color:#f92672">=&lt;/span>
-&lt;span style="color:#a6e22e">Enum&lt;/span>&lt;span style="color:#f92672">.&lt;/span>any?(timers, &lt;span style="color:#66d9ef">fn&lt;/span>
-{_name, &lt;span style="color:#66d9ef">true&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
-{_name, _result} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>)
-&lt;span style="color:#66d9ef">if&lt;/span> failed &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Heart callback failed. Firmware will revert soon&amp;#34;&lt;/span>)
-{&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:fail&lt;/span>, state}
-&lt;span style="color:#66d9ef">else&lt;/span>
-&lt;span style="color:#75715e"># all checks passed&lt;/span>
-{&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>, state}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:initialize_heart&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(__MODULE__, &lt;span style="color:#e6db74">:heart&lt;/span>)
-{&lt;span style="color:#e6db74">:noreply&lt;/span>, state}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>warn(&lt;span style="color:#e6db74">&amp;#34;Timeout connecting to NervesHub. Firmware should not be considered valid&amp;#34;&lt;/span>)
-{&lt;span style="color:#e6db74">:noreply&lt;/span>, %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: %{state&lt;span style="color:#f92672">.&lt;/span>timers &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>}}}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#75715e"># Timer already expired&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(name, &lt;span style="color:#66d9ef">true&lt;/span>) &lt;span style="color:#66d9ef">do&lt;/span>
-{name, &lt;span style="color:#66d9ef">true&lt;/span>}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer) &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">NervesHubLink&lt;/span>&lt;span style="color:#f92672">.&lt;/span>connected?() &lt;span style="color:#66d9ef">do&lt;/span>
-&lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>cancel_timer(timer)
-&lt;span style="color:#75715e"># this is what we&amp;#39;ve all been waiting for!&lt;/span>
-&lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_firmware()
-{&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>}
-&lt;span style="color:#66d9ef">else&lt;/span>
-{&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">catch&lt;/span>
-type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span>
-&lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Failed to check nerves_hub_timeout: &lt;/span>&lt;span style="color:#e6db74">#{&lt;/span>inspect({type, error})&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
-{&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;span style="color:#66d9ef">end&lt;/span>
-&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="why-when-and-how">Why, When and How&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Copyright 2022 Connor Rigby&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Licensed under the Apache License, Version 2.0 (the &amp;#34;License&amp;#34;);&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># you may not use this file except in compliance with the License.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># You may obtain a copy of the License at&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># http://www.apache.org/licenses/LICENSE-2.0&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># &lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Unless required by applicable law or agreed to in writing, software&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># distributed under the License is distributed on an &amp;#34;AS IS&amp;#34; BASIS,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># See the License for the specific language governing permissions and&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># limitations under the License.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyFirmware.Validator&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@moduledoc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> Validates the currently running firmware as soon as
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> the device connects to NervesHub. This is implemented
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> via setting a callback in `:heart`.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> Validation is implemented by polling certain functions,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> namely: `NervesHubLink.connected?()`. It is given
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> 5 minutes to connect. If it does not connect, the `:heart`
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> module will reboot the device via `nerves_heart`.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74">
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> All the code in this module must be **VERY SAFE** a crash
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> will cause the device to reboot.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">use&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#f92672">require&lt;/span> &lt;span style="color:#a6e22e">Logger&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># 5 minutes&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span> &lt;span style="color:#ae81ff">300_000&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># shoudl be started in a supervisor spec&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> start_link(args, opts \\ [&lt;span style="color:#e6db74">name&lt;/span>: __MODULE__]) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>start_link(__MODULE__, args, opts)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> terminate(_, _) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>clear_callback()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@doc&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&amp;#34;&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> This is the `:heart` callback entrypoint
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74"> &amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> heart(pid \\ __MODULE__) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> safe_call(pid, &lt;span style="color:#e6db74">:heart&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> safe_call(pid, call) &lt;span style="color:#f92672">when&lt;/span> is_pid(pid) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>alive?(pid) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">GenServer&lt;/span>&lt;span style="color:#f92672">.&lt;/span>call(pid, call)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">catch&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {&lt;span style="color:#e6db74">:error&lt;/span>, {type, error}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:not_alive&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> safe_call(server, call) &lt;span style="color:#f92672">when&lt;/span> is_atom(server) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> pid &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>whereis(server) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> safe_call(pid, call)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:error&lt;/span>, &lt;span style="color:#e6db74">:no_pid&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> safe_call(unknown, _call) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:error&lt;/span>, {&lt;span style="color:#e6db74">:unknown&lt;/span>, unknown}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> init(args) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> nerves_hub_timeout &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Keyword&lt;/span>&lt;span style="color:#f92672">.&lt;/span>get(args, &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#a6e22e">@nerves_hub_timeout_ms&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> nerves_hub_timeout_timer &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>send_after(self(), &lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, nerves_hub_timeout)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># Add other timers here in the same format&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:ok&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> %{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">timers&lt;/span>: %{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: nerves_hub_timeout_timer,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> handle_call(&lt;span style="color:#e6db74">:heart&lt;/span>, _from, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> timers &lt;span style="color:#f92672">=&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Map&lt;/span>&lt;span style="color:#f92672">.&lt;/span>new(state&lt;span style="color:#f92672">.&lt;/span>timers, &lt;span style="color:#66d9ef">fn&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {name, &lt;span style="color:#e6db74">:ok&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, &lt;span style="color:#e6db74">:ok&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {name, timer} &lt;span style="color:#f92672">when&lt;/span> is_reference(timer) &lt;span style="color:#f92672">-&amp;gt;&lt;/span> evaluate_timer(name, timer)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {name, value} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {name, value}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> state &lt;span style="color:#f92672">=&lt;/span> %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: timers}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> failed &lt;span style="color:#f92672">=&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Enum&lt;/span>&lt;span style="color:#f92672">.&lt;/span>any?(timers, &lt;span style="color:#66d9ef">fn&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {_name, &lt;span style="color:#66d9ef">true&lt;/span>} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {_name, _result} &lt;span style="color:#f92672">-&amp;gt;&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> failed &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Heart callback failed. Firmware will revert soon&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:fail&lt;/span>, state}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># all checks passed&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:reply&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>, state}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">@impl&lt;/span> &lt;span style="color:#a6e22e">GenServer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:initialize_heart&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(__MODULE__, &lt;span style="color:#e6db74">:heart&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:noreply&lt;/span>, state}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> handle_info(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, state) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>warn(&lt;span style="color:#e6db74">&amp;#34;Timeout connecting to NervesHub. Firmware should not be considered valid&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:noreply&lt;/span>, %{state &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">timers&lt;/span>: %{state&lt;span style="color:#f92672">.&lt;/span>timers &lt;span style="color:#f92672">|&lt;/span> &lt;span style="color:#e6db74">nerves_hub_timeout&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>}}}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># Timer already expired&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(name, &lt;span style="color:#66d9ef">true&lt;/span>) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {name, &lt;span style="color:#66d9ef">true&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">def&lt;/span> evaluate_timer(&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer) &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">try&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">NervesHubLink&lt;/span>&lt;span style="color:#f92672">.&lt;/span>connected?() &lt;span style="color:#66d9ef">do&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Process&lt;/span>&lt;span style="color:#f92672">.&lt;/span>cancel_timer(timer)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e"># this is what we&amp;#39;ve all been waiting for!&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_firmware()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, &lt;span style="color:#e6db74">:ok&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">else&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">catch&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> type, error &lt;span style="color:#f92672">-&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Logger&lt;/span>&lt;span style="color:#f92672">.&lt;/span>error(&lt;span style="color:#e6db74">&amp;#34;Failed to check nerves_hub_timeout: &lt;/span>&lt;span style="color:#e6db74">#{&lt;/span>inspect({type, error})&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> {&lt;span style="color:#e6db74">:nerves_hub_timeout&lt;/span>, timer}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">end&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="why-when-and-how">Why, When and How&lt;/h1>
 &lt;p>With Nerves, you get this fancy A/B partition scheme. You can think of it as
 analogous to blue/green deploys of web applications. How this works internally
 is subject for another post as it differes per device. In the case of this post,
@@ -270,12 +292,12 @@ valid firmware, protecting you, the developer from having to fix devices manuall
 them is really up to you, but the example at the beginning provides a basic implementation
 you can use and modify to suit your own needs.&lt;/p>
 &lt;p>The first useful function is &lt;code>:heart.set_callback/2&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(&lt;span style="color:#a6e22e">SomeModuleThatKnowsHowToValidateFirmware&lt;/span>, &lt;span style="color:#e6db74">:function_to_call&lt;/span>)
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>This callback will be called every &lt;code>HEART_BEAT_TIMEOUT&lt;/code>. By default this is once
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#e6db74">:heart&lt;/span>&lt;span style="color:#f92672">.&lt;/span>set_callback(&lt;span style="color:#a6e22e">SomeModuleThatKnowsHowToValidateFirmware&lt;/span>, &lt;span style="color:#e6db74">:function_to_call&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>This callback will be called every &lt;code>HEART_BEAT_TIMEOUT&lt;/code>. By default this is once
 every 60 seconds.&lt;/p>
 &lt;p>The other useful function you will need is &lt;code>Nerves.Runtime.validate_fw/0&lt;/code>:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_fw()
-&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the above example, we wrap both of these functions up inside a GenServer
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">Nerves.Runtime&lt;/span>&lt;span style="color:#f92672">.&lt;/span>validate_fw()
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>In the above example, we wrap both of these functions up inside a GenServer
 process. this process will be started during our firmware&amp;rsquo;s application supervision
 tree startup. I put it at the very end so that firmware can only be validated if everything
 else is &amp;ldquo;up and running&amp;rdquo; whatever that means for the application.

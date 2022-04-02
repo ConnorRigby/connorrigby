@@ -1,224 +1,165 @@
-<!doctype html><html lang=en>
-<head>
-<title>Automtatically Validating Nerves Firmware :: cone.codes</title>
-<meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<meta name=description content="What makes a firmware 'valid' anyway?">
-<meta name=keywords content="nerves">
-<meta name=robots content="noodp">
-<link rel=canonical href=https://cone.codes/posts/auto-validate-nerves-firmware/>
-<link rel=stylesheet href=https://cone.codes/assets/style.css>
-<link rel=stylesheet href=https://cone.codes/assets/pink.css>
-<link rel=apple-touch-icon href=https://cone.codes/img/apple-touch-icon-192x192.png>
-<link rel="shortcut icon" href=https://cone.codes/img/favicon/pink.png>
-<meta name=twitter:card content="summary">
-<meta name=twitter:site content="https://connorrigby.github.io/connorrigby/">
-<meta name=twitter:creator content="PressY4Pie">
-<meta property="og:locale" content="en">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Automtatically Validating Nerves Firmware">
-<meta property="og:description" content="What makes a firmware 'valid' anyway?">
-<meta property="og:url" content="https://cone.codes/posts/auto-validate-nerves-firmware/">
-<meta property="og:site_name" content="cone.codes">
-<meta property="og:image" content="https://cone.codes/img/favicon/pink.png">
-<meta property="og:image:width" content="2048">
-<meta property="og:image:height" content="1024">
-<meta property="article:published_time" content="2022-01-19 08:42:31 -0700 -0700">
-</head>
-<body class=pink>
-<div class="container full headings--one-size">
-<header class=header>
-<div class=header__inner>
-<div class=header__logo>
-<a href=/>
-<div class=logo>
-cone.codes
-</div>
-</a>
-</div>
-</div>
-</header>
-<div class=content>
-<div class=post>
-<h1 class=post-title>
-<a href=https://cone.codes/posts/auto-validate-nerves-firmware/>Automtatically Validating Nerves Firmware</a></h1>
-<div class=post-meta>
-<span class=post-date>
-2022-01-19
-</span>
-<span class=post-author>:: Connor Rigby</span>
-</div>
-<span class=post-tags>
-#<a href=https://cone.codes/tags/nerves/>nerves</a>&nbsp;
+<!doctype html><html lang=en><head><title>Automtatically Validating Nerves Firmware :: cone.codes</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="What makes a firmware 'valid' anyway?"><meta name=keywords content="nerves"><meta name=robots content="noodp"><link rel=canonical href=https://cone.codes/posts/auto-validate-nerves-firmware/><link rel=stylesheet href=https://cone.codes/assets/style.css><link rel=stylesheet href=https://cone.codes/assets/pink.css><link rel=apple-touch-icon href=https://cone.codes/img/apple-touch-icon-192x192.png><link rel="shortcut icon" href=https://cone.codes/img/favicon/pink.png><meta name=twitter:card content="summary"><meta name=twitter:site content="https://connorrigby.github.io/connorrigby/"><meta name=twitter:creator content="PressY4Pie"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="og:title" content="Automtatically Validating Nerves Firmware"><meta property="og:description" content="What makes a firmware 'valid' anyway?"><meta property="og:url" content="https://cone.codes/posts/auto-validate-nerves-firmware/"><meta property="og:site_name" content="cone.codes"><meta property="og:image" content="https://cone.codes/img/favicon/pink.png"><meta property="og:image:width" content="2048"><meta property="og:image:height" content="1024"><meta property="article:published_time" content="2022-01-19 08:42:31 -0700 -0700"></head><body class=pink><div class="container full headings--one-size"><header class=header><div class=header__inner><div class=header__logo><a href=/><div class=logo>cone.codes</div></a></div></div></header><div class=content><div class=post><h1 class=post-title><a href=https://cone.codes/posts/auto-validate-nerves-firmware/>Automtatically Validating Nerves Firmware</a></h1><div class=post-meta><span class=post-date>2022-01-19</span>
+<span class=post-author>:: Connor Rigby</span></div><span class=post-tags>#<a href=https://cone.codes/tags/nerves/>nerves</a>&nbsp;
 #<a href=https://cone.codes/tags/embedded/>embedded</a>&nbsp;
-#<a href=https://cone.codes/tags/elixir/>elixir</a>&nbsp;
-</span>
-<div class=post-content><div>
-<h1 id=tldr>TLDR<a href=#tldr class=hanchor arialabel=Anchor>&#8983;</a> </h1>
-<p>Here&rsquo;s the code you probably want. Modify it as you see fit.</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=color:#75715e># Copyright 2022 Connor Rigby</span>
-<span style=color:#75715e># </span>
-<span style=color:#75715e># Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);</span>
-<span style=color:#75715e># you may not use this file except in compliance with the License.</span>
-<span style=color:#75715e># You may obtain a copy of the License at</span>
-<span style=color:#75715e># </span>
-<span style=color:#75715e>#     http://www.apache.org/licenses/LICENSE-2.0</span>
-<span style=color:#75715e># </span>
-<span style=color:#75715e># Unless required by applicable law or agreed to in writing, software</span>
-<span style=color:#75715e># distributed under the License is distributed on an &#34;AS IS&#34; BASIS,</span>
-<span style=color:#75715e># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
-<span style=color:#75715e># See the License for the specific language governing permissions and</span>
-<span style=color:#75715e># limitations under the License.</span>
-<span style=color:#66d9ef>defmodule</span> <span style=color:#a6e22e>MyFirmware.Validator</span> <span style=color:#66d9ef>do</span>
-  <span style=color:#a6e22e>@moduledoc</span> <span style=color:#e6db74>&#34;&#34;&#34;
-</span><span style=color:#e6db74>  Validates the currently running firmware as soon as
-</span><span style=color:#e6db74>  the device connects to NervesHub. This is implemented
-</span><span style=color:#e6db74>  via setting a callback in `:heart`.
-</span><span style=color:#e6db74>
-</span><span style=color:#e6db74>  Validation is implemented by polling certain functions,
-</span><span style=color:#e6db74>  namely: `NervesHubLink.connected?()`. It is given
-</span><span style=color:#e6db74>  5 minutes to connect. If it does not connect, the `:heart`
-</span><span style=color:#e6db74>  module will reboot the device via `nerves_heart`.
-</span><span style=color:#e6db74>
-</span><span style=color:#e6db74>  All the code in this module must be **VERY SAFE** a crash
-</span><span style=color:#e6db74>  will cause the device to reboot.
-</span><span style=color:#e6db74>  &#34;&#34;&#34;</span>
-
-  <span style=color:#f92672>use</span> <span style=color:#a6e22e>GenServer</span>
-  <span style=color:#f92672>require</span> <span style=color:#a6e22e>Logger</span>
-
-  <span style=color:#75715e># 5 minutes</span>
-  <span style=color:#a6e22e>@nerves_hub_timeout_ms</span> <span style=color:#ae81ff>300_000</span>
-
-  <span style=color:#75715e># shoudl be started in a supervisor spec</span>
-  <span style=color:#a6e22e>@doc</span> <span style=color:#66d9ef>false</span>
-  <span style=color:#66d9ef>def</span> start_link(args, opts \\ [<span style=color:#e6db74>name</span>: __MODULE__]) <span style=color:#66d9ef>do</span>
-    <span style=color:#a6e22e>GenServer</span><span style=color:#f92672>.</span>start_link(__MODULE__, args, opts)
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#a6e22e>@impl</span> <span style=color:#a6e22e>GenServer</span>
-  <span style=color:#66d9ef>def</span> terminate(_, _) <span style=color:#66d9ef>do</span>
-    <span style=color:#e6db74>:heart</span><span style=color:#f92672>.</span>clear_callback()
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#a6e22e>@doc</span> <span style=color:#e6db74>&#34;&#34;&#34;
-</span><span style=color:#e6db74>  This is the `:heart` callback entrypoint 
-</span><span style=color:#e6db74>  &#34;&#34;&#34;</span>
-  <span style=color:#66d9ef>def</span> heart(pid \\ __MODULE__) <span style=color:#66d9ef>do</span>
-    safe_call(pid, <span style=color:#e6db74>:heart</span>)
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#66d9ef>def</span> safe_call(pid, call) <span style=color:#f92672>when</span> is_pid(pid) <span style=color:#66d9ef>do</span>
-    <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>Process</span><span style=color:#f92672>.</span>alive?(pid) <span style=color:#66d9ef>do</span>
-      <span style=color:#66d9ef>try</span> <span style=color:#66d9ef>do</span>
-        <span style=color:#a6e22e>GenServer</span><span style=color:#f92672>.</span>call(pid, call)
-      <span style=color:#66d9ef>catch</span>
-        type, error <span style=color:#f92672>-&gt;</span> {<span style=color:#e6db74>:error</span>, {type, error}}
-      <span style=color:#66d9ef>end</span>
-    <span style=color:#66d9ef>else</span>
-      {<span style=color:#e6db74>:error</span>, <span style=color:#e6db74>:not_alive</span>}
-    <span style=color:#66d9ef>end</span>
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#66d9ef>def</span> safe_call(server, call) <span style=color:#f92672>when</span> is_atom(server) <span style=color:#66d9ef>do</span>
-    <span style=color:#66d9ef>if</span> pid <span style=color:#f92672>=</span> <span style=color:#a6e22e>Process</span><span style=color:#f92672>.</span>whereis(server) <span style=color:#66d9ef>do</span>
-      safe_call(pid, call)
-    <span style=color:#66d9ef>else</span>
-      {<span style=color:#e6db74>:error</span>, <span style=color:#e6db74>:no_pid</span>}
-    <span style=color:#66d9ef>end</span>
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#66d9ef>def</span> safe_call(unknown, _call) <span style=color:#66d9ef>do</span>
-    {<span style=color:#e6db74>:error</span>, {<span style=color:#e6db74>:unknown</span>, unknown}}
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#a6e22e>@impl</span> <span style=color:#a6e22e>GenServer</span>
-  <span style=color:#66d9ef>def</span> init(args) <span style=color:#66d9ef>do</span>
-    nerves_hub_timeout <span style=color:#f92672>=</span> <span style=color:#a6e22e>Keyword</span><span style=color:#f92672>.</span>get(args, <span style=color:#e6db74>:nerves_hub_timeout</span>, <span style=color:#a6e22e>@nerves_hub_timeout_ms</span>)
-    nerves_hub_timeout_timer <span style=color:#f92672>=</span> <span style=color:#a6e22e>Process</span><span style=color:#f92672>.</span>send_after(self(), <span style=color:#e6db74>:nerves_hub_timeout</span>, nerves_hub_timeout)
-
-    <span style=color:#75715e># Add other timers here in the same format</span>
-
-    {<span style=color:#e6db74>:ok</span>,
-     %{
-       <span style=color:#e6db74>timers</span>: %{
-         <span style=color:#e6db74>nerves_hub_timeout</span>: nerves_hub_timeout_timer,
-       }
-     }}
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#a6e22e>@impl</span> <span style=color:#a6e22e>GenServer</span>
-  <span style=color:#66d9ef>def</span> handle_call(<span style=color:#e6db74>:heart</span>, _from, state) <span style=color:#66d9ef>do</span>
-    timers <span style=color:#f92672>=</span>
-      <span style=color:#a6e22e>Map</span><span style=color:#f92672>.</span>new(state<span style=color:#f92672>.</span>timers, <span style=color:#66d9ef>fn</span>
-        {name, <span style=color:#e6db74>:ok</span>} <span style=color:#f92672>-&gt;</span> {name, <span style=color:#e6db74>:ok</span>}
-        {name, timer} <span style=color:#f92672>when</span> is_reference(timer) <span style=color:#f92672>-&gt;</span> evaluate_timer(name, timer)
-        {name, value} <span style=color:#f92672>-&gt;</span> {name, value}
-      <span style=color:#66d9ef>end</span>)
-
-    state <span style=color:#f92672>=</span> %{state <span style=color:#f92672>|</span> <span style=color:#e6db74>timers</span>: timers}
-
-    failed <span style=color:#f92672>=</span>
-      <span style=color:#a6e22e>Enum</span><span style=color:#f92672>.</span>any?(timers, <span style=color:#66d9ef>fn</span>
-        {_name, <span style=color:#66d9ef>true</span>} <span style=color:#f92672>-&gt;</span> <span style=color:#66d9ef>true</span>
-        {_name, _result} <span style=color:#f92672>-&gt;</span> <span style=color:#66d9ef>false</span>
-      <span style=color:#66d9ef>end</span>)
-
-    <span style=color:#66d9ef>if</span> failed <span style=color:#66d9ef>do</span>
-      <span style=color:#a6e22e>Logger</span><span style=color:#f92672>.</span>error(<span style=color:#e6db74>&#34;Heart callback failed. Firmware will revert soon&#34;</span>)
-      {<span style=color:#e6db74>:reply</span>, <span style=color:#e6db74>:fail</span>, state}
-    <span style=color:#66d9ef>else</span>
-      <span style=color:#75715e># all checks passed</span>
-      {<span style=color:#e6db74>:reply</span>, <span style=color:#e6db74>:ok</span>, state}
-    <span style=color:#66d9ef>end</span>
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#a6e22e>@impl</span> <span style=color:#a6e22e>GenServer</span>
-  <span style=color:#66d9ef>def</span> handle_info(<span style=color:#e6db74>:initialize_heart</span>, state) <span style=color:#66d9ef>do</span>
-    <span style=color:#e6db74>:heart</span><span style=color:#f92672>.</span>set_callback(__MODULE__, <span style=color:#e6db74>:heart</span>)
-    {<span style=color:#e6db74>:noreply</span>, state}
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#66d9ef>def</span> handle_info(<span style=color:#e6db74>:nerves_hub_timeout</span>, state) <span style=color:#66d9ef>do</span>
-    <span style=color:#a6e22e>Logger</span><span style=color:#f92672>.</span>warn(<span style=color:#e6db74>&#34;Timeout connecting to NervesHub. Firmware should not be considered valid&#34;</span>)
-    {<span style=color:#e6db74>:noreply</span>, %{state <span style=color:#f92672>|</span> <span style=color:#e6db74>timers</span>: %{state<span style=color:#f92672>.</span>timers <span style=color:#f92672>|</span> <span style=color:#e6db74>nerves_hub_timeout</span>: <span style=color:#66d9ef>true</span>}}}
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#75715e># Timer already expired</span>
-  <span style=color:#66d9ef>def</span> evaluate_timer(name, <span style=color:#66d9ef>true</span>) <span style=color:#66d9ef>do</span>
-    {name, <span style=color:#66d9ef>true</span>}
-  <span style=color:#66d9ef>end</span>
-
-  <span style=color:#66d9ef>def</span> evaluate_timer(<span style=color:#e6db74>:nerves_hub_timeout</span>, timer) <span style=color:#66d9ef>do</span>
-    <span style=color:#66d9ef>try</span> <span style=color:#66d9ef>do</span>
-      <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>NervesHubLink</span><span style=color:#f92672>.</span>connected?() <span style=color:#66d9ef>do</span>
-        <span style=color:#a6e22e>Process</span><span style=color:#f92672>.</span>cancel_timer(timer)
-        <span style=color:#75715e># this is what we&#39;ve all been waiting for!</span>
-        <span style=color:#a6e22e>Nerves.Runtime</span><span style=color:#f92672>.</span>validate_firmware()
-        {<span style=color:#e6db74>:nerves_hub_timeout</span>, <span style=color:#e6db74>:ok</span>}
-      <span style=color:#66d9ef>else</span>
-        {<span style=color:#e6db74>:nerves_hub_timeout</span>, timer}
-      <span style=color:#66d9ef>end</span>
-    <span style=color:#66d9ef>catch</span>
-      type, error <span style=color:#f92672>-&gt;</span>
-        <span style=color:#a6e22e>Logger</span><span style=color:#f92672>.</span>error(<span style=color:#e6db74>&#34;Failed to check nerves_hub_timeout: </span><span style=color:#e6db74>#{</span>inspect({type, error})<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
-        {<span style=color:#e6db74>:nerves_hub_timeout</span>, timer}
-    <span style=color:#66d9ef>end</span>
-  <span style=color:#66d9ef>end</span>
-<span style=color:#66d9ef>end</span>
-</code></pre></div><h1 id=why-when-and-how>Why, When and How<a href=#why-when-and-how class=hanchor arialabel=Anchor>&#8983;</a> </h1>
-<p>With Nerves, you get this fancy A/B partition scheme. You can think of it as
+#<a href=https://cone.codes/tags/elixir/>elixir</a>&nbsp;</span><div class=post-content><div><h1 id=tldr>TLDR<a href=#tldr class=hanchor arialabel=Anchor>&#8983;</a></h1><p>Here&rsquo;s the code you probably want. Modify it as you see fit.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=display:flex><span><span style=color:#75715e># Copyright 2022 Connor Rigby</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># </span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Licensed under the Apache License, Version 2.0 (the &#34;License&#34;);</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># you may not use this file except in compliance with the License.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># You may obtain a copy of the License at</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># </span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#     http://www.apache.org/licenses/LICENSE-2.0</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># </span>
+</span></span><span style=display:flex><span><span style=color:#75715e># Unless required by applicable law or agreed to in writing, software</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># distributed under the License is distributed on an &#34;AS IS&#34; BASIS,</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># See the License for the specific language governing permissions and</span>
+</span></span><span style=display:flex><span><span style=color:#75715e># limitations under the License.</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>defmodule</span> <span style=color:#a6e22e>MyFirmware.Validator</span> <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@moduledoc</span> <span style=color:#e6db74>&#34;&#34;&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  Validates the currently running firmware as soon as
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  the device connects to NervesHub. This is implemented
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  via setting a callback in `:heart`.
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  Validation is implemented by polling certain functions,
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  namely: `NervesHubLink.connected?()`. It is given
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  5 minutes to connect. If it does not connect, the `:heart`
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  module will reboot the device via `nerves_heart`.
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  All the code in this module must be **VERY SAFE** a crash
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  will cause the device to reboot.
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  &#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>use</span> <span style=color:#a6e22e>GenServer</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>require</span> <span style=color:#a6e22e>Logger</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># 5 minutes</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@nerves_hub_timeout_ms</span> <span style=color:#ae81ff>300_000</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># shoudl be started in a supervisor spec</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@doc</span> <span style=color:#66d9ef>false</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> start_link(args, opts \\ [<span style=color:#e6db74>name</span>: __MODULE__]) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>GenServer</span><span style=color:#f92672>.</span>start_link(__MODULE__, args, opts)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@impl</span> <span style=color:#a6e22e>GenServer</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> terminate(_, _) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>:heart</span><span style=color:#f92672>.</span>clear_callback()
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@doc</span> <span style=color:#e6db74>&#34;&#34;&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  This is the `:heart` callback entrypoint 
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  &#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> heart(pid \\ __MODULE__) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    safe_call(pid, <span style=color:#e6db74>:heart</span>)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> safe_call(pid, call) <span style=color:#f92672>when</span> is_pid(pid) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>Process</span><span style=color:#f92672>.</span>alive?(pid) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>try</span> <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>GenServer</span><span style=color:#f92672>.</span>call(pid, call)
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>catch</span>
+</span></span><span style=display:flex><span>        type, error <span style=color:#f92672>-&gt;</span> {<span style=color:#e6db74>:error</span>, {type, error}}
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span>
+</span></span><span style=display:flex><span>      {<span style=color:#e6db74>:error</span>, <span style=color:#e6db74>:not_alive</span>}
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> safe_call(server, call) <span style=color:#f92672>when</span> is_atom(server) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> pid <span style=color:#f92672>=</span> <span style=color:#a6e22e>Process</span><span style=color:#f92672>.</span>whereis(server) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>      safe_call(pid, call)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span>
+</span></span><span style=display:flex><span>      {<span style=color:#e6db74>:error</span>, <span style=color:#e6db74>:no_pid</span>}
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> safe_call(unknown, _call) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>:error</span>, {<span style=color:#e6db74>:unknown</span>, unknown}}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@impl</span> <span style=color:#a6e22e>GenServer</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> init(args) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    nerves_hub_timeout <span style=color:#f92672>=</span> <span style=color:#a6e22e>Keyword</span><span style=color:#f92672>.</span>get(args, <span style=color:#e6db74>:nerves_hub_timeout</span>, <span style=color:#a6e22e>@nerves_hub_timeout_ms</span>)
+</span></span><span style=display:flex><span>    nerves_hub_timeout_timer <span style=color:#f92672>=</span> <span style=color:#a6e22e>Process</span><span style=color:#f92672>.</span>send_after(self(), <span style=color:#e6db74>:nerves_hub_timeout</span>, nerves_hub_timeout)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e># Add other timers here in the same format</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>:ok</span>,
+</span></span><span style=display:flex><span>     %{
+</span></span><span style=display:flex><span>       <span style=color:#e6db74>timers</span>: %{
+</span></span><span style=display:flex><span>         <span style=color:#e6db74>nerves_hub_timeout</span>: nerves_hub_timeout_timer,
+</span></span><span style=display:flex><span>       }
+</span></span><span style=display:flex><span>     }}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@impl</span> <span style=color:#a6e22e>GenServer</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> handle_call(<span style=color:#e6db74>:heart</span>, _from, state) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    timers <span style=color:#f92672>=</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>Map</span><span style=color:#f92672>.</span>new(state<span style=color:#f92672>.</span>timers, <span style=color:#66d9ef>fn</span>
+</span></span><span style=display:flex><span>        {name, <span style=color:#e6db74>:ok</span>} <span style=color:#f92672>-&gt;</span> {name, <span style=color:#e6db74>:ok</span>}
+</span></span><span style=display:flex><span>        {name, timer} <span style=color:#f92672>when</span> is_reference(timer) <span style=color:#f92672>-&gt;</span> evaluate_timer(name, timer)
+</span></span><span style=display:flex><span>        {name, value} <span style=color:#f92672>-&gt;</span> {name, value}
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>end</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    state <span style=color:#f92672>=</span> %{state <span style=color:#f92672>|</span> <span style=color:#e6db74>timers</span>: timers}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    failed <span style=color:#f92672>=</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>Enum</span><span style=color:#f92672>.</span>any?(timers, <span style=color:#66d9ef>fn</span>
+</span></span><span style=display:flex><span>        {_name, <span style=color:#66d9ef>true</span>} <span style=color:#f92672>-&gt;</span> <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>        {_name, _result} <span style=color:#f92672>-&gt;</span> <span style=color:#66d9ef>false</span>
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>end</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> failed <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>Logger</span><span style=color:#f92672>.</span>error(<span style=color:#e6db74>&#34;Heart callback failed. Firmware will revert soon&#34;</span>)
+</span></span><span style=display:flex><span>      {<span style=color:#e6db74>:reply</span>, <span style=color:#e6db74>:fail</span>, state}
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>else</span>
+</span></span><span style=display:flex><span>      <span style=color:#75715e># all checks passed</span>
+</span></span><span style=display:flex><span>      {<span style=color:#e6db74>:reply</span>, <span style=color:#e6db74>:ok</span>, state}
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@impl</span> <span style=color:#a6e22e>GenServer</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> handle_info(<span style=color:#e6db74>:initialize_heart</span>, state) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>:heart</span><span style=color:#f92672>.</span>set_callback(__MODULE__, <span style=color:#e6db74>:heart</span>)
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>:noreply</span>, state}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> handle_info(<span style=color:#e6db74>:nerves_hub_timeout</span>, state) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>Logger</span><span style=color:#f92672>.</span>warn(<span style=color:#e6db74>&#34;Timeout connecting to NervesHub. Firmware should not be considered valid&#34;</span>)
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>:noreply</span>, %{state <span style=color:#f92672>|</span> <span style=color:#e6db74>timers</span>: %{state<span style=color:#f92672>.</span>timers <span style=color:#f92672>|</span> <span style=color:#e6db74>nerves_hub_timeout</span>: <span style=color:#66d9ef>true</span>}}}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Timer already expired</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> evaluate_timer(name, <span style=color:#66d9ef>true</span>) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    {name, <span style=color:#66d9ef>true</span>}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> evaluate_timer(<span style=color:#e6db74>:nerves_hub_timeout</span>, timer) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span> <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>NervesHubLink</span><span style=color:#f92672>.</span>connected?() <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>Process</span><span style=color:#f92672>.</span>cancel_timer(timer)
+</span></span><span style=display:flex><span>        <span style=color:#75715e># this is what we&#39;ve all been waiting for!</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>Nerves.Runtime</span><span style=color:#f92672>.</span>validate_firmware()
+</span></span><span style=display:flex><span>        {<span style=color:#e6db74>:nerves_hub_timeout</span>, <span style=color:#e6db74>:ok</span>}
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>else</span>
+</span></span><span style=display:flex><span>        {<span style=color:#e6db74>:nerves_hub_timeout</span>, timer}
+</span></span><span style=display:flex><span>      <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>catch</span>
+</span></span><span style=display:flex><span>      type, error <span style=color:#f92672>-&gt;</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>Logger</span><span style=color:#f92672>.</span>error(<span style=color:#e6db74>&#34;Failed to check nerves_hub_timeout: </span><span style=color:#e6db74>#{</span>inspect({type, error})<span style=color:#e6db74>}</span><span style=color:#e6db74>&#34;</span>)
+</span></span><span style=display:flex><span>        {<span style=color:#e6db74>:nerves_hub_timeout</span>, timer}
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>end</span>
+</span></span></code></pre></div><h1 id=why-when-and-how>Why, When and How<a href=#why-when-and-how class=hanchor arialabel=Anchor>&#8983;</a></h1><p>With Nerves, you get this fancy A/B partition scheme. You can think of it as
 analogous to blue/green deploys of web applications. How this works internally
 is subject for another post as it differes per device. In the case of this post,
 all you will need to know is that if we don&rsquo;t call a special function, upon the
-next reboot, the device will revert to it&rsquo;s previous firmware.</p>
-<h2 id=why-have-a-system-to-auto-revert-firmware>Why have a system to auto revert firmware?<a href=#why-have-a-system-to-auto-revert-firmware class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<p>To start out, it may be useful to understand <em>why</em> this setup exists. Imagine if
+next reboot, the device will revert to it&rsquo;s previous firmware.</p><h2 id=why-have-a-system-to-auto-revert-firmware>Why have a system to auto revert firmware?<a href=#why-have-a-system-to-auto-revert-firmware class=hanchor arialabel=Anchor>&#8983;</a></h2><p>To start out, it may be useful to understand <em>why</em> this setup exists. Imagine if
 you will, you have a fleet of devices in production. What they do is not important,
 but if you&rsquo;re creative, you may pretend they do something cool. If you&rsquo;re not creative,
 just assume that a broken firmware means you have to personally go out and fix any device
-personally. This is your motivation.</p>
-<p>The general idea is that if your device is online, and able to download a new update,
+personally. This is your motivation.</p><p>The general idea is that if your device is online, and able to download a new update,
 it&rsquo;s in a &ldquo;valid&rdquo; state. Say the device is on firmware <code>A</code>. It was the first version of
 the firmware you wrote. It has bugs, but those aren&rsquo;t important as you can just fix them
 with an update. Firmware <code>A</code> is good enough to get you connected to a central Firmware
@@ -228,90 +169,42 @@ Now that firmware <code>A</code> is deployed to your fleet of devices, you <stro
 an update to break them. This is where the auto revert system comes in. When you
 finally get around to fixing those bugs, you can use the Firmware Update Server
 to dispatch your update to the devices, but you want to be really sure that they
-are at least as not broken as they started out before the update.</p>
-<p>When an update is downloaded, it will be applied to the <code>B</code> partition, and the device
+are at least as not broken as they started out before the update.</p><p>When an update is downloaded, it will be applied to the <code>B</code> partition, and the device
 will attempt to boot from that partition after the update completes. When it does,
 there are some conditions that need to be met before considering the new firmware
-as <code>valid</code>.</p>
-<h2 id=when-is-a-firmware-considered-valid>When is a firmware considered valid?<a href=#when-is-a-firmware-considered-valid class=hanchor arialabel=Anchor>&#8983;</a> </h2>
-<p>The short answer is of course it depends.</p>
-<p>The short answer that is probably most useful to you is that if your devices can
-receive further updates, it&rsquo;s what i like to call <code>valid enough</code>.</p>
-<p>The long answer is as follows:</p>
-<p>You ultimately need to decide what makes your firmware <code>valid</code>. The code provided in
+as <code>valid</code>.</p><h2 id=when-is-a-firmware-considered-valid>When is a firmware considered valid?<a href=#when-is-a-firmware-considered-valid class=hanchor arialabel=Anchor>&#8983;</a></h2><p>The short answer is of course it depends.</p><p>The short answer that is probably most useful to you is that if your devices can
+receive further updates, it&rsquo;s what i like to call <code>valid enough</code>.</p><p>The long answer is as follows:</p><p>You ultimately need to decide what makes your firmware <code>valid</code>. The code provided in
 the above example simply assumes that connecting to NervesHub is what makes it <code>valid</code>.
 Your use case will probably differ depending on what the device does. For example,
-some common other checks include connecting to your own networks, APIs etc.</p>
-<p>If your device connects to your Firmware Update Server, but doesn&rsquo;t perform it&rsquo;s
-core functionality, maybe that shouldn&rsquo;t be considered <code>valid</code>.</p>
-<h1 id=how-to-validate-a-firmware>How to validate a firmware?<a href=#how-to-validate-a-firmware class=hanchor arialabel=Anchor>&#8983;</a> </h1>
-<p>Naturally, the answer to this question is it depends yet again. However, the example
+some common other checks include connecting to your own networks, APIs etc.</p><p>If your device connects to your Firmware Update Server, but doesn&rsquo;t perform it&rsquo;s
+core functionality, maybe that shouldn&rsquo;t be considered <code>valid</code>.</p><h1 id=how-to-validate-a-firmware>How to validate a firmware?<a href=#how-to-validate-a-firmware class=hanchor arialabel=Anchor>&#8983;</a></h1><p>Naturally, the answer to this question is it depends yet again. However, the example
 above is of course already implemented, so that&rsquo;s <code>how</code> you&rsquo;re gonna do it. The point
 here is that this is not the <strong>only</strong> way to validate a firmware. It&rsquo;s just one I
-and at least a couple other production projects work.</p>
-<p>The main system we will be working with here is called <code>heart</code>. It&rsquo;s an
+and at least a couple other production projects work.</p><p>The main system we will be working with here is called <code>heart</code>. It&rsquo;s an
 underappreciated system in the Erlang Runtime System with almost no documentation.
-(as is customary for the most useful parts of ERTS)</p>
-<p>What you need to know is that there&rsquo;s a module called <code>:heart</code> that gets started very early
+(as is customary for the most useful parts of ERTS)</p><p>What you need to know is that there&rsquo;s a module called <code>:heart</code> that gets started very early
 in the boot process. Nerves implements a custom process (<a href=https://github.com/nerves-project/nerves_heart>source</a>)
 to keep <code>:heart</code> and your devices watchdog in sync. This means that if Erlang (read: your firmware)
 or the device watchdog becomes unresponsive, the device will reboot. The special part about
 that, is that if your firmware was not validated, the reboot will revert back to the last
-valid firmware, protecting you, the developer from having to fix devices manually.</p>
-<p>So how do you use it? there are a couple functions you will need to know about. The glue between
+valid firmware, protecting you, the developer from having to fix devices manually.</p><p>So how do you use it? there are a couple functions you will need to know about. The glue between
 them is really up to you, but the example at the beginning provides a basic implementation
-you can use and modify to suit your own needs.</p>
-<p>The first useful function is <code>:heart.set_callback/2</code>:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=color:#e6db74>:heart</span><span style=color:#f92672>.</span>set_callback(<span style=color:#a6e22e>SomeModuleThatKnowsHowToValidateFirmware</span>, <span style=color:#e6db74>:function_to_call</span>)
-</code></pre></div><p>This callback will be called every <code>HEART_BEAT_TIMEOUT</code>. By default this is once
-every 60 seconds.</p>
-<p>The other useful function you will need is <code>Nerves.Runtime.validate_fw/0</code>:</p>
-<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=color:#a6e22e>Nerves.Runtime</span><span style=color:#f92672>.</span>validate_fw()
-</code></pre></div><p>In the above example, we wrap both of these functions up inside a GenServer
+you can use and modify to suit your own needs.</p><p>The first useful function is <code>:heart.set_callback/2</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=display:flex><span><span style=color:#e6db74>:heart</span><span style=color:#f92672>.</span>set_callback(<span style=color:#a6e22e>SomeModuleThatKnowsHowToValidateFirmware</span>, <span style=color:#e6db74>:function_to_call</span>)
+</span></span></code></pre></div><p>This callback will be called every <code>HEART_BEAT_TIMEOUT</code>. By default this is once
+every 60 seconds.</p><p>The other useful function you will need is <code>Nerves.Runtime.validate_fw/0</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=display:flex><span><span style=color:#a6e22e>Nerves.Runtime</span><span style=color:#f92672>.</span>validate_fw()
+</span></span></code></pre></div><p>In the above example, we wrap both of these functions up inside a GenServer
 process. this process will be started during our firmware&rsquo;s application supervision
 tree startup. I put it at the very end so that firmware can only be validated if everything
 else is &ldquo;up and running&rdquo; whatever that means for the application.
 That process schedules some timers that once expired will consider the firmware &ldquo;invalid&rdquo;.
 The whole trick here is that your device will not be connected immediately since the network
-takes time to come up. The timer essentially says that</p>
-<pre><code>upon a reboot, if the device hasn't connected to the firmware update server in
+takes time to come up. The timer essentially says that</p><pre><code>upon a reboot, if the device hasn't connected to the firmware update server in
 the allowed amount of time (5 minutes in this case), the firmware should be reverted.
-</code></pre>
-<p>The other thing to note here is that any crash, exception, error etc will be considered a failure.
+</code></pre><p>The other thing to note here is that any crash, exception, error etc will be considered a failure.
 (and cause a reboot) This means you should think about how the process interacts and introspects the
-rest of the system.</p>
-<h1 id=conclusion>Conclusion<a href=#conclusion class=hanchor arialabel=Anchor>&#8983;</a> </h1>
-<p>Hopefully this at least gets you thinking about how to recover from failure <strong>before</strong>
-you end up failing with no escape route.</p>
-<p>Deploying firmware to production devices has quite a few things like this that you may not
-even be considering. Stay tuned for more on deploying your firmware to production</p>
-</div></div>
-<div class=pagination>
-<div class=pagination__title>
-<span class=pagination__title-h>Read other posts</span>
-<hr>
-</div>
-<div class=pagination__buttons>
-<span class="button previous">
-<a href=https://cone.codes/posts/iex-in-a-box/>
-<span class=button__icon>←</span>
-<span class=button__text>IEx in a Box</span>
-</a>
-</span>
-</div>
-</div>
-</div>
-</div>
-<footer class=footer>
-<div class=footer__inner>
-<div class="copyright copyright--user">
-<span>Creative Commons Attribution 4.0 International</span>
-<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span>
-</div>
-</div>
-</footer>
-<script src=https://cone.codes/assets/main.js></script>
-<script src=https://cone.codes/assets/prism.js></script>
-</div>
-</body>
-</html>
+rest of the system.</p><h1 id=conclusion>Conclusion<a href=#conclusion class=hanchor arialabel=Anchor>&#8983;</a></h1><p>Hopefully this at least gets you thinking about how to recover from failure <strong>before</strong>
+you end up failing with no escape route.</p><p>Deploying firmware to production devices has quite a few things like this that you may not
+even be considering. Stay tuned for more on deploying your firmware to production</p></div></div><div class=pagination><div class=pagination__title><span class=pagination__title-h>Read other posts</span><hr></div><div class=pagination__buttons><span class="button previous"><a href=https://cone.codes/posts/iex-in-a-box/><span class=button__icon>←</span>
+<span class=button__text>IEx in a Box</span></a></span></div></div></div></div><footer class=footer><div class=footer__inner><div class="copyright copyright--user"><span>Creative Commons Attribution 4.0 International</span>
+<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span></div></div></footer><script src=https://cone.codes/assets/main.js></script>
+<script src=https://cone.codes/assets/prism.js></script></div></body></html>

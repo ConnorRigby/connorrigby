@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>embedded linux on cone.codes</title><link>https://cone.codes/tags/embedded-linux/</link><description>Recent content in embedded linux on cone.codes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>Creative Commons Attribution 4.0 International</copyright><lastBuildDate>Fri, 01 Apr 2022 23:17:51 -0600</lastBuildDate><atom:link href="https://cone.codes/tags/embedded-linux/index.xml" rel="self" type="application/rss+xml"/><item><title>Can Link</title><link>https://cone.codes/posts/can-link/</link><pubDate>Fri, 01 Apr 2022 23:17:51 -0600</pubDate><guid>https://cone.codes/posts/can-link/</guid><description>I&amp;rsquo;ve been working on an idea off and on for the last year or so, and it&amp;rsquo;s finally culminated into a real thing that exists. What I want is a device that can interface an aftermarket ECU in my car, and mesh network with other nodes to syncronize RGB LEDs. This is of course a silly idea and would not make a real sustainable product or business, but I think it&amp;rsquo;s fun.</description><content>&lt;p>I&amp;rsquo;ve been working on an idea off and on for the last year or so, and it&amp;rsquo;s finally culminated
+into a real thing that exists. What I want is a device that can interface an aftermarket
+&lt;a href="https://en.wikipedia.org/wiki/Electronic_control_unit">ECU&lt;/a> in my car, and mesh network with
+other nodes to syncronize RGB LEDs. This is of course a silly idea and would not make a real
+sustainable product or business, but I think it&amp;rsquo;s fun.&lt;/p>
+&lt;p>Like I said, I&amp;rsquo;ve been working on this for quite a while, so there&amp;rsquo;s quite a bit to catch up
+on. Instead of blabbing about the software (which will be blabbed about in the future), I&amp;rsquo;m
+gonna write up a quick summary of my experience doing an entire PCB &amp;ldquo;from scratch&amp;rdquo;, since that&amp;rsquo;s
+the most recent portion of the project I&amp;rsquo;ve completed.&lt;/p>
+&lt;h2 id="designing-pcb-for-nerves-firmware">Designing PCB for Nerves Firmware&lt;/h2>
+&lt;p>I picked the BeagleBoneBlue as my development board because it had &lt;em>almost&lt;/em> all the stuff I
+wanted for the final design. It also uses the &lt;a href="https://octavosystems.com/octavo_products/osd335x/">OSD335x&lt;/a> CPU, which is a very well supported device in the Nerves world. I
+use it for my current work product, I&amp;rsquo;ve worked with other companies using Nerves that use it,
+etc.&lt;/p>
+&lt;p>The first step (after making a prototype ofc) was to make the schematic. Another reason I picked
+this devboard was beause of how simple it is. The entire schematic is 5 pages long, and fits
+into a single PDF. &lt;a href="https://github.com/beagleboard/beaglebone-blue/blob/9812bd927a0157a0a326debb858e36678e6eed64/BeagleBone_Blue_sch.pdf">Here it is&lt;/a>.
+I &lt;a href="https://github.com/miata-bot/can-link/commit/69d136ebbe92c61059c85afc6919afc3817271a1">tricked a friend of mine into importing it into kicad&lt;/a> for me, then got to modifying it.&lt;/p>
+&lt;h2 id="the-schematic">The Schematic&lt;/h2>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/958716169408352256/unknown.png?width=2160&amp;amp;height=864" alt="schematic">&lt;/p>
+&lt;p>The easy part was removing things I didn&amp;rsquo;t need:&lt;/p>
+&lt;ul>
+&lt;li>EMMC - I plan on using an SD card for this. It&amp;rsquo;s just easier.&lt;/li>
+&lt;li>GPIO connectors - I wanted to keep these, but routing was just too hard for me.&lt;/li>
+&lt;li>Motor controllers - No motor to control&lt;/li>
+&lt;/ul>
+&lt;p>Next up was to change out some parts:&lt;/p>
+&lt;ul>
+&lt;li>Barrel jack changed for a somewhat standard connector used by many aftermarket ECUs.&lt;/li>
+&lt;li>USB Mini changed out for a USB C connector - this port is used for firmware debugging&lt;/li>
+&lt;li>USB A changed out for USB B - this port is used for a mass storage gadget&lt;/li>
+&lt;li>Battery connector changed out for one that I happen to have.&lt;/li>
+&lt;li>Changed all the passives out for bigger packages. This was because I&amp;rsquo;m hand soldering it.&lt;/li>
+&lt;/ul>
+&lt;p>And finally I added some parts:&lt;/p>
+&lt;ul>
+&lt;li>JST connector for GPS modules&lt;/li>
+&lt;li>3 Mosfets - used for PWMing the RGB LEDs&lt;/li>
+&lt;li>RF69 Packet radio - used for syncing devices without internet&lt;/li>
+&lt;li>TAG Connect serial console - used for firmware debugging&lt;/li>
+&lt;/ul>
+&lt;p>And that&amp;rsquo;s it. Pretty much everything else was a standard BeagleBone Blue. I moved some pins
+during routing after consulting the datasheet.&lt;/p>
+&lt;h2 id="the-layout">The Layout&lt;/h2>
+&lt;p>After the schematic was mostly together, next up was to lay all the components out. I picked 0603 and 0805 size packages for everything, and laid all the components on the top side. I&amp;rsquo;m no expert so anyone with real experience in Electrical Engineering will probably have something to say. I guess here is a good place to put: if you, the reader use this for something and it doesn&amp;rsquo;t work; sorry and also I&amp;rsquo;m not responsible for whatever happens.&lt;/p>
+&lt;p>I started out with just plopping everything down.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/958094663275925524/unknown.png" alt="layout">.&lt;/p>
+&lt;p>The first goal was to make sure I have 3d models for every part. I know it seems overkill, but it
+just helps me with part placement to be able to visualize things. Kicad&amp;rsquo;s 3d viewer is pretty good once you get the models loaded. If you don&amp;rsquo;t do this, you really should.&lt;/p>
+&lt;p>Next I sorted the components out into their respective &amp;ldquo;systems&amp;rdquo;. Decoupling caps per device, pullup/pulldown resistors in some sort of structure, power components, radio, connectors etc.
+The goal here is to make sure there&amp;rsquo;s room on the board for everything and to start thinking of everything in relationship to the other components. A good layout here is going to pay off later when it comes to routing.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/958814194273243146/unknown.png" alt="layout-progress">&lt;/p>
+&lt;p>What happens next is sort of non-linear. I pretty much just arbitrarily started pecking around
+the design, juggling parts around into the correct general shape so it can be moved around as a unit. I didn&amp;rsquo;t have an requirements for where anything should go, which was sort of hard for me to reason about, so I just started assembling sections into blocks.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/958883714396487722/unknown.png" alt="layout-progress">&lt;/p>
+&lt;p>The general layout started to take place at this point. The WiFi module was laid out and placed permenantly at the edge of the board. The RF69 radio goes right under it.
+Right around this point is when I put some serious thought into how the device should look and
+feel when it exists in the real world. I moved the connectors around, made cardboard boxes in about the same shape, etc. Just to see how it would feel to actually use.&lt;/p>
+&lt;p>Eventually, I decided that the USB and CAN interfaces should be on the right. This is where power
+and CAN signal are provided to the board. Technically, that is all that is required to run the device.&lt;/p>
+&lt;p>&lt;img src="https://cdn.discordapp.com/attachments/643947340453118019/959123883582169098/unknown.png" alt="connectors">&lt;/p>
+&lt;h2 id="the-routing">The Routing&lt;/h2>
+&lt;p>After all the main systems were layed out on the board, it was time to route the board. This is
+the second BGA package I&amp;rsquo;ve fanned out, and this one was far larger than the last. I did what
+I think is an okay job. I&amp;rsquo;m certain it could be improved, and I&amp;rsquo;m sure one day I will think this
+is the worst thing ever. I ended up removing a bunch of extra stuff I wanted, but didn&amp;rsquo;t need.
+Notably, GPIO connectors, extra buttons and extra LEDs. This is the gist of what I came up with for
+fanning the package out.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/959291652126679080/unknown.png" alt="fanout">&lt;/p>
+&lt;p>While working on that, I took breaks to do other sections that could be built independently.
+The WiFi / Bluetooth module was a particularly neat one.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/959184408865284156/unknown.png" alt="bluetooth-layout">&lt;/p>
+&lt;p>Once I got all the tracks out of the BGA, all that was left was to shuffle all the signals
+to where they needed to go. If I were to do it over again, I&amp;rsquo;d move the SD Card over to the right
+side of the board. I originally put the SD Card on the top of the board thinking I could fan the
+MMC pins that direction. I don&amp;rsquo;t remember exactly why i couldn&amp;rsquo;t, but I think it was because
+of the big power pours.&lt;/p>
+&lt;p>This is pretty much the final layout and routing.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/959527063302307960/unknown.png" alt="final-layout-routing">&lt;/p>
+&lt;p>Lastly, I sprinkled some text, a logo, and connector descriptions onto the silkscreen.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/957852929254113300/959576291563163708/unknown.png" alt="final-pcb-model">&lt;/p>
+&lt;p>And that&amp;rsquo;s pretty much as far as I got this weekend. Next up is to pick out each of the individual components.
+One notable issue with that is there&amp;rsquo;s this whole global chip shortage thing..&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/959626650935517194/unknown.png?width=2160&amp;amp;height=144" alt="chip-shortage">&lt;/p>
+&lt;p>I ordered a few OSD335X chips on Aliexpress. Tune back in next week to see if they show up or not.&lt;/p></content></item></channel></rss>
