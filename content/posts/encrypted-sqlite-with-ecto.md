@@ -22,7 +22,7 @@ Compiling SQLCipher:
   LDFLAGS="-lcrypto"
 ```
 
-# Encrypting SQLite databases
+# Encrypting SQLite Databases
 
 SQLite is one of my favorite pieces of software in the world. It's used in millions
 of projects and devices. One issue with the official public version of it is that
