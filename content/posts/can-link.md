@@ -3,7 +3,7 @@ title = "Can Link"
 date = "2022-04-01T23:17:51-06:00"
 author = "Connor Rigby"
 authorTwitter = "@PressY4Pie" 
-cover = "https://raw.githubusercontent.com/miata-bot/can-link/main/hardware/PCB-Render.png?token=GHSAT0AAAAAABPXTHEURDTPBNZ7ORQPU5AOYSH3TPQ"
+cover = "https://media.discordapp.net/attachments/957852929254113300/959576291563163708/unknown.png"
 tags = ["can-link", "elixir", "nerves", "embedded linux", "linux"]
 keywords = ["linux", "elixir", "nerves"]
 description = "Automotive Nerves Project - RGB Controller with CAN Interface"
