@@ -1,0 +1,196 @@
+<!doctype html><html lang=en><head><title>Using PWM with Nerves :: cone.codes</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Learn how to use Linux's PWM subsystem with Nerves"><meta name=keywords content="nerves,PWM"><meta name=robots content="noodp"><link rel=canonical href=https://cone.codes/posts/nerves-pwm/><link rel=stylesheet href=https://cone.codes/assets/style.css><link rel=stylesheet href=https://cone.codes/assets/pink.css><link rel=apple-touch-icon href=https://cone.codes/img/apple-touch-icon-192x192.png><link rel="shortcut icon" href=https://cone.codes/img/favicon/pink.png><meta name=twitter:card content="summary"><meta name=twitter:site content="https://connorrigby.github.io/connorrigby/"><meta name=twitter:creator content="PressY4Pie"><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="og:title" content="Using PWM with Nerves"><meta property="og:description" content="Learn how to use Linux's PWM subsystem with Nerves"><meta property="og:url" content="https://cone.codes/posts/nerves-pwm/"><meta property="og:site_name" content="cone.codes"><meta property="og:image" content="https://cone.codes/"><meta property="og:image:width" content="2048"><meta property="og:image:height" content="1024"><meta property="article:published_time" content="2022-04-04 19:07:10 -0600 -0600"></head><body class=pink><div class="container full headings--one-size"><header class=header><div class=header__inner><div class=header__logo><a href=/><div class=logo>cone.codes</div></a></div></div></header><div class=content><div class=post><h1 class=post-title><a href=https://cone.codes/posts/nerves-pwm/>Using PWM with Nerves</a></h1><div class=post-meta><span class=post-date>2022-04-04</span>
+<span class=post-author>:: Connor Rigby</span></div><span class=post-tags>#<a href=https://cone.codes/tags/elixir/>elixir</a>&nbsp;
+#<a href=https://cone.codes/tags/nerves/>nerves</a>&nbsp;
+#<a href=https://cone.codes/tags/linux/>linux</a>&nbsp;
+#<a href=https://cone.codes/tags/pwm/>PWM</a>&nbsp;</span><div class=post-content><div><h2 id=tldr>TLDR<a href=#tldr class=hanchor arialabel=Anchor>&#8983;</a></h2><p>This is probably what you need. Take it and modify it as you see fit.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=display:flex><span><span style=color:#66d9ef>defmodule</span> <span style=color:#a6e22e>MyAPP.PWM</span> <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@moduledoc</span> <span style=color:#e6db74>&#34;&#34;&#34;
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  Basic control
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  pwm:
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>     ehrpwm1A == pwmchip2/pwm0 (LED R)
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>     ehrpwm1B == pwmchip2/pwm1 (LED G)
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>     ehrpwm2A == pwmchip0/pwm0 (LED B)
+</span></span></span><span style=display:flex><span><span style=color:#e6db74>  &#34;&#34;&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@pwms</span> [
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>led_r</span>: {<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>0</span>},
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>led_g</span>: {<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>1</span>},
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>led_b</span>: {<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>0</span>},
+</span></span><span style=display:flex><span>  ]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e># Period for 25kHz PWM</span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@period</span> <span style=color:#ae81ff>40_000</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> init() <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@pwms</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>Enum</span><span style=color:#f92672>.</span>each(<span style=color:#66d9ef>fn</span> {_pwm, {chip, pin}} <span style=color:#f92672>-&gt;</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>write(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchip</span><span style=color:#e6db74>#{</span>chip<span style=color:#e6db74>}</span><span style=color:#e6db74>/export&#34;</span>, to_string(pin))
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>write(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchip</span><span style=color:#e6db74>#{</span>chip<span style=color:#e6db74>}</span><span style=color:#e6db74>/pwm</span><span style=color:#e6db74>#{</span>pin<span style=color:#e6db74>}</span><span style=color:#e6db74>/period&#34;</span>, to_string(<span style=color:#a6e22e>@period</span>))
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> period(pwm, period) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    {chip, pwm} <span style=color:#f92672>=</span> <span style=color:#a6e22e>Keyword</span><span style=color:#f92672>.</span>fetch!(<span style=color:#a6e22e>@pwms</span>, pwm)
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>write(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchip</span><span style=color:#e6db74>#{</span>chip<span style=color:#e6db74>}</span><span style=color:#e6db74>/pwm</span><span style=color:#e6db74>#{</span>pwm<span style=color:#e6db74>}</span><span style=color:#e6db74>/period&#34;</span>, to_string(period))
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> period(pwm) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    {chip, pwm} <span style=color:#f92672>=</span> <span style=color:#a6e22e>Keyword</span><span style=color:#f92672>.</span>fetch!(<span style=color:#a6e22e>@pwms</span>, pwm)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>read!(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchip</span><span style=color:#e6db74>#{</span>chip<span style=color:#e6db74>}</span><span style=color:#e6db74>/pwm</span><span style=color:#e6db74>#{</span>pwm<span style=color:#e6db74>}</span><span style=color:#e6db74>/period&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>String</span><span style=color:#f92672>.</span>trim()
+</span></span><span style=display:flex><span>    <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>String</span><span style=color:#f92672>.</span>to_integer()
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> duty_cycle(pwm, duty_cycle) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    {chip, pwm} <span style=color:#f92672>=</span> <span style=color:#a6e22e>Keyword</span><span style=color:#f92672>.</span>fetch!(<span style=color:#a6e22e>@pwms</span>, pwm)
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>write(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchip</span><span style=color:#e6db74>#{</span>chip<span style=color:#e6db74>}</span><span style=color:#e6db74>/pwm</span><span style=color:#e6db74>#{</span>pwm<span style=color:#e6db74>}</span><span style=color:#e6db74>/duty_cycle&#34;</span>, to_string(duty_cycle))
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> duty_cycle(pwm) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    {chip, pwm} <span style=color:#f92672>=</span> <span style=color:#a6e22e>Keyword</span><span style=color:#f92672>.</span>fetch!(<span style=color:#a6e22e>@pwms</span>, pwm)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>read!(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchip</span><span style=color:#e6db74>#{</span>chip<span style=color:#e6db74>}</span><span style=color:#e6db74>/pwm</span><span style=color:#e6db74>#{</span>pwm<span style=color:#e6db74>}</span><span style=color:#e6db74>/duty_cycle&#34;</span>)
+</span></span><span style=display:flex><span>    <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>String</span><span style=color:#f92672>.</span>trim()
+</span></span><span style=display:flex><span>    <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>String</span><span style=color:#f92672>.</span>to_integer()
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> enable(pwm, enable) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    {chip, pwm} <span style=color:#f92672>=</span> <span style=color:#a6e22e>Keyword</span><span style=color:#f92672>.</span>fetch!(<span style=color:#a6e22e>@pwms</span>, pwm)
+</span></span><span style=display:flex><span>    enable <span style=color:#f92672>=</span> <span style=color:#66d9ef>if</span> enable, <span style=color:#e6db74>do</span>: <span style=color:#ae81ff>1</span>, <span style=color:#e6db74>else</span>: <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>write(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchip</span><span style=color:#e6db74>#{</span>chip<span style=color:#e6db74>}</span><span style=color:#e6db74>/pwm</span><span style=color:#e6db74>#{</span>pwm<span style=color:#e6db74>}</span><span style=color:#e6db74>/enable&#34;</span>, to_string(enable))
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> enable(pwm) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    {chip, pwm} <span style=color:#f92672>=</span> <span style=color:#a6e22e>Keyword</span><span style=color:#f92672>.</span>fetch!(<span style=color:#a6e22e>@pwms</span>, pwm)
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;1&#34;</span> <span style=color:#f92672>==</span> <span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>read!(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchip</span><span style=color:#e6db74>#{</span>chip<span style=color:#e6db74>}</span><span style=color:#e6db74>/pwm</span><span style=color:#e6db74>#{</span>pwm<span style=color:#e6db74>}</span><span style=color:#e6db74>/enable&#34;</span>) <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>String</span><span style=color:#f92672>.</span>trim()
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>end</span>
+</span></span></code></pre></div><h2 id=pwm-in-linux>PWM In Linux<a href=#pwm-in-linux class=hanchor arialabel=Anchor>&#8983;</a></h2><p>I&rsquo;ve always found using PWM in Linux unnecessarily tedious. When I first got started in Embedded Linux, I was coming from experience with Arduino. Love it or hate it, Arduino has this particular feature dialed in from the beginning.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>setup</span>() {
+</span></span><span style=display:flex><span>  pinMode(A0, OUTPUT);
+</span></span><span style=display:flex><span>  analogWrite(A0, <span style=color:#ae81ff>255</span>);
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>That&rsquo;s it.</p><p>Okay, so obviously it&rsquo;s not a completely fair comparison, Arduino is a C++ framework, Linux is an operating system yada yada. Anyway here&rsquo;s the snippit from the <a href=https://www.kernel.org/doc/html/latest/driver-api/pwm.html>Linux
+Kernel Documentation</a></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>struct</span> pwm_lookup board_pwm_lookup[] <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>        PWM_LOOKUP(<span style=color:#e6db74>&#34;tegra-pwm&#34;</span>, <span style=color:#ae81ff>0</span>, <span style=color:#e6db74>&#34;pwm-backlight&#34;</span>, NULL,
+</span></span><span style=display:flex><span>                   <span style=color:#ae81ff>50000</span>, PWM_POLARITY_NORMAL),
+</span></span><span style=display:flex><span>};
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> __init <span style=color:#a6e22e>board_init</span>(<span style=color:#66d9ef>void</span>)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>        ...
+</span></span><span style=display:flex><span>        pwm_add_table(board_pwm_lookup, ARRAY_SIZE(board_pwm_lookup));
+</span></span><span style=display:flex><span>        ...
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Alright <strong>what?</strong> So as it turns out that part of the document is completely irelevant to actually <em>using</em> PWM. If you read down further, you&rsquo;ll find</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>pwm_apply_state</span>(<span style=color:#66d9ef>struct</span> pwm_device <span style=color:#f92672>*</span>pwm, <span style=color:#66d9ef>struct</span> pwm_state <span style=color:#f92672>*</span>state);
+</span></span></code></pre></div><p>after no less than 7 links to other functions you need to call first. Continue reading on, and oh! Linux will let you use PWM via <a href=https://en.wikipedia.org/wiki/Sysfs>Sysfs</a>, just like GPIO and many other systems. The document however won&rsquo;t tell you exactly how to use that interface directly, you&rsquo;ll have to actually <em>read</em> the document. This upset me, so here&rsquo;s something you can copy and paste.</p><p>The root directory you want to be in is <code>/sys/class/pwm</code>. To use a PWM output, you&rsquo;ll need to <code>export</code> it. (replace <code>N</code> with your PWM chip, and <code>C</code> with the channel)</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>echo <span style=color:#ae81ff>1</span> &gt; /sys/class/pwm/pwmchipN/export
+</span></span></code></pre></div><p>In Elixir, we can do</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=display:flex><span><span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>write!(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchipN/export&#34;</span>, <span style=color:#e6db74>&#34;1&#34;</span>)
+</span></span></code></pre></div><p>Next, it must be enabled:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>echo <span style=color:#ae81ff>1</span> &gt; /sys/class/pwm/pwmchipN/enable
+</span></span></code></pre></div><p>And you know the deal in Elixir:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=display:flex><span><span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>write!(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchipN/export&#34;</span>, <span style=color:#e6db74>&#34;1&#34;</span>)
+</span></span></code></pre></div><p>Next, you need to set the <code>period</code> and <code>duty_cycle</code>. If you don&rsquo;t know what these are, (possibly because you came here from Arduino that doesn&rsquo;t tell you anything about either of these two words), Check <a href=https://en.wikipedia.org/wiki/Pulse-width_modulation>Wikipedia</a>.</p><p>The short of it is, <code>duty_cycle</code> is the percentage of time that the signal is active. <code>period</code> is how long that signal is active. The values provided to Linux are in nanoseconds, so to set a 1 millisecond period, you would do:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>echo <span style=color:#ae81ff>1000000</span> &gt; /sys/class/pwm/pwmchipN/pwmC/period
+</span></span></code></pre></div><p>or in Elixir:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=display:flex><span><span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>write!(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchipN/pwmC/period&#34;</span>, <span style=color:#e6db74>&#34;1000000&#34;</span>)
+</span></span></code></pre></div><p>And to set the a duty cycle of 50%, you&rsquo;d set the <code>duty_cycle</code> to half of the <code>period</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-bash data-lang=bash><span style=display:flex><span>echo <span style=color:#ae81ff>500000</span> &gt; /sys/class/pwm/pwmchipN/pwmC/duty_cycle
+</span></span></code></pre></div><p>or in Elixir:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=display:flex><span><span style=color:#a6e22e>File</span><span style=color:#f92672>.</span>write!(<span style=color:#e6db74>&#34;/sys/class/pwm/pwmchipN/pwmC/duty_cycle&#34;</span>, <span style=color:#e6db74>&#34;500000&#34;</span>)
+</span></span></code></pre></div><p>And that&rsquo;s pretty much it. I encourage you to study the official document further, it may be a little dense, but all the information you need <em>is</em> there. Hopefully this helped someone along their way to controlling something interesting with PWM.</p><h2 id=bonus-round-rgb-led-control>Bonus Round: RGB LED control<a href=#bonus-round-rgb-led-control class=hanchor arialabel=Anchor>&#8983;</a></h2><p>The entire reason, I had to learn this information was to control RGB LEDs for a <a href=/posts/can-link/>device I&rsquo;m building</a> to control LEDs based on an engine control unit. This is what I use for that.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-elixir data-lang=elixir><span style=display:flex><span><span style=color:#66d9ef>defmodule</span> <span style=color:#a6e22e>MyApp.RGB</span> <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>alias</span> <span style=color:#a6e22e>MyApp.PWM</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>use</span> <span style=color:#a6e22e>GenServer</span>
+</span></span><span style=display:flex><span>  <span style=color:#f92672>require</span> <span style=color:#a6e22e>Logger</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>@all_channels</span> [<span style=color:#e6db74>:led_r</span>, <span style=color:#e6db74>:led_g</span>, <span style=color:#e6db74>:led_b</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> start_link(opts) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>GenServer</span><span style=color:#f92672>.</span>start_link(__MODULE__, opts, <span style=color:#e6db74>name</span>: __MODULE__)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> on() <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>GenServer</span><span style=color:#f92672>.</span>call(__MODULE__, <span style=color:#e6db74>:on</span>)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> off() <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>GenServer</span><span style=color:#f92672>.</span>call(__MODULE__, <span style=color:#e6db74>:off</span>)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> set_color(val) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>GenServer</span><span style=color:#f92672>.</span>call(__MODULE__, {<span style=color:#e6db74>:set_color</span>, val})
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> set_brightness(val) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>GenServer</span><span style=color:#f92672>.</span>call(__MODULE__, {<span style=color:#e6db74>:set_brightness</span>, val})
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> init(_opts) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@all_channels</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>Enum</span><span style=color:#f92672>.</span>each(<span style=color:#66d9ef>fn</span> channel <span style=color:#f92672>-&gt;</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>PWM</span><span style=color:#f92672>.</span>enable(channel, <span style=color:#66d9ef>false</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    state <span style=color:#f92672>=</span> %{
+</span></span><span style=display:flex><span>      <span style=color:#e6db74>color</span>: <span style=color:#e6db74>:white</span>,
+</span></span><span style=display:flex><span>      <span style=color:#e6db74>brightness</span>: <span style=color:#ae81ff>100</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>:ok</span>, state}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> handle_call(<span style=color:#e6db74>:on</span>, _from, state) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    set(state<span style=color:#f92672>.</span>color, state<span style=color:#f92672>.</span>brightness)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@all_channels</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>Enum</span><span style=color:#f92672>.</span>each(<span style=color:#66d9ef>fn</span> channel <span style=color:#f92672>-&gt;</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>PWM</span><span style=color:#f92672>.</span>enable(channel, <span style=color:#66d9ef>true</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>:reply</span>, <span style=color:#e6db74>:ok</span>, state}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> handle_call(<span style=color:#e6db74>:off</span>, _from, state) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@all_channels</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>Enum</span><span style=color:#f92672>.</span>each(<span style=color:#66d9ef>fn</span> channel <span style=color:#f92672>-&gt;</span>
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>PWM</span><span style=color:#f92672>.</span>enable(channel, <span style=color:#66d9ef>false</span>)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>:reply</span>, <span style=color:#e6db74>:ok</span>, state}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> handle_call({<span style=color:#e6db74>:set_color</span>, val}, _from, state) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    set(val, state<span style=color:#f92672>.</span>brightness)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>:reply</span>, <span style=color:#e6db74>:ok</span>, %{state <span style=color:#f92672>|</span> <span style=color:#e6db74>color</span>: val}}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>def</span> handle_call({<span style=color:#e6db74>:set_brightness</span>, val}, _from, state) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    set(state<span style=color:#f92672>.</span>color, val)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    {<span style=color:#e6db74>:reply</span>, <span style=color:#e6db74>:ok</span>, %{state <span style=color:#f92672>|</span> <span style=color:#e6db74>brightness</span>: val}}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>defp</span> set(color, brightness) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    rgb_val <span style=color:#f92672>=</span> rgb_from_color(color, brightness)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>Enum</span><span style=color:#f92672>.</span>zip([<span style=color:#e6db74>:led_r</span>, <span style=color:#e6db74>:led_g</span>, <span style=color:#e6db74>:led_b</span>], rgb_val)
+</span></span><span style=display:flex><span>    <span style=color:#f92672>|&gt;</span> <span style=color:#a6e22e>Enum</span><span style=color:#f92672>.</span>each(<span style=color:#66d9ef>fn</span> {channel, val} <span style=color:#f92672>-&gt;</span>
+</span></span><span style=display:flex><span>      duty_cycle <span style=color:#f92672>=</span> floor(<span style=color:#a6e22e>PWM</span><span style=color:#f92672>.</span>period(channel) <span style=color:#f92672>*</span> val <span style=color:#f92672>/</span> <span style=color:#ae81ff>255</span>)
+</span></span><span style=display:flex><span>      <span style=color:#a6e22e>PWM</span><span style=color:#f92672>.</span>duty_cycle(channel, duty_cycle)
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>defp</span> rgb_from_color(val, brightness) <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>    max <span style=color:#f92672>=</span> <span style=color:#ae81ff>255</span> <span style=color:#f92672>*</span> brightness <span style=color:#f92672>/</span> <span style=color:#ae81ff>100</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>case</span> val <span style=color:#66d9ef>do</span>
+</span></span><span style=display:flex><span>      <span style=color:#e6db74>:white</span> <span style=color:#f92672>-&gt;</span> [max, max, max]
+</span></span><span style=display:flex><span>      <span style=color:#e6db74>:red</span> <span style=color:#f92672>-&gt;</span> [max, <span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>0</span>]
+</span></span><span style=display:flex><span>      <span style=color:#e6db74>:green</span> <span style=color:#f92672>-&gt;</span> [<span style=color:#ae81ff>0</span>, max, <span style=color:#ae81ff>0</span>]
+</span></span><span style=display:flex><span>      <span style=color:#e6db74>:blue</span> <span style=color:#f92672>-&gt;</span> [<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>0</span>, max]
+</span></span><span style=display:flex><span>      <span style=color:#e6db74>:yellow</span> <span style=color:#f92672>-&gt;</span> [max, max, <span style=color:#ae81ff>0</span>]
+</span></span><span style=display:flex><span>      <span style=color:#e6db74>:cyan</span> <span style=color:#f92672>-&gt;</span> [<span style=color:#ae81ff>0</span>, max, max]
+</span></span><span style=display:flex><span>      <span style=color:#e6db74>:magenta</span> <span style=color:#f92672>-&gt;</span> [max, <span style=color:#ae81ff>0</span>, max]
+</span></span><span style=display:flex><span>      {r, g, b} <span style=color:#f92672>-&gt;</span> [r, g, b]
+</span></span><span style=display:flex><span>      [r, g, b] <span style=color:#f92672>-&gt;</span> [r, g, b]
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>end</span>
+</span></span></code></pre></div></div></div><div class=pagination><div class=pagination__title><span class=pagination__title-h>Read other posts</span><hr></div><div class=pagination__buttons><span class="button next"><a href=https://cone.codes/posts/can-link/><span class=button__text>Can Link</span>
+<span class=button__icon>→</span></a></span></div></div></div></div><footer class=footer><div class=footer__inner><div class="copyright copyright--user"><span>Creative Commons Attribution 4.0 International</span>
+<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span></div></div></footer><script src=https://cone.codes/assets/main.js></script>
+<script src=https://cone.codes/assets/prism.js></script></div></body></html>
