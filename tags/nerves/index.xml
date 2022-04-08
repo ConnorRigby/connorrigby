@@ -1,4 +1,79 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>nerves on cone.codes</title><link>https://cone.codes/tags/nerves/</link><description>Recent content in nerves on cone.codes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>Creative Commons Attribution 4.0 International</copyright><lastBuildDate>Mon, 04 Apr 2022 19:07:10 -0600</lastBuildDate><atom:link href="https://cone.codes/tags/nerves/index.xml" rel="self" type="application/rss+xml"/><item><title>Using PWM with Nerves</title><link>https://cone.codes/posts/nerves-pwm/</link><pubDate>Mon, 04 Apr 2022 19:07:10 -0600</pubDate><guid>https://cone.codes/posts/nerves-pwm/</guid><description>TLDR This is probably what you need. Take it and modify it as you see fit.
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>nerves on cone.codes</title><link>https://cone.codes/tags/nerves/</link><description>Recent content in nerves on cone.codes</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>Creative Commons Attribution 4.0 International</copyright><lastBuildDate>Fri, 08 Apr 2022 15:19:25 -0600</lastBuildDate><atom:link href="https://cone.codes/tags/nerves/index.xml" rel="self" type="application/rss+xml"/><item><title>Can Link Part 2</title><link>https://cone.codes/posts/can-link-pt-2/</link><pubDate>Fri, 08 Apr 2022 15:19:25 -0600</pubDate><guid>https://cone.codes/posts/can-link-pt-2/</guid><description>Last week, I closed with
+I ordered a few OSD335X chips on Aliexpress. Tune back in next week to see if they show up or not.
+Well, it&amp;rsquo;s next week, and my order got canceled. I ordered s&amp;rsquo;more from other places, and it was canceled. I Couldn&amp;rsquo;t even find anywhere that had a single SOM for me to buy. Best I could find was Minimum Order Quantity of 250 pieces.</description><content>&lt;p>Last week, I closed with&lt;/p>
+&lt;blockquote>
+&lt;p>I ordered a few OSD335X chips on Aliexpress. Tune back in next week to see if they show up or not.&lt;/p>
+&lt;/blockquote>
+&lt;p>Well, it&amp;rsquo;s next week, and my order got canceled. I ordered s&amp;rsquo;more from other places, and it was canceled. I Couldn&amp;rsquo;t even find anywhere that had a &lt;em>single&lt;/em> SOM for me to buy. Best I could find was &lt;a href="https://en.wikipedia.org/wiki/MOQ">Minimum Order Quantity&lt;/a> of 250 pieces. So I did what any reasonable person would do; Desoldered some from old, broken boards.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/961053924801011712/IMG_20220405_180317.jpg?width=759&amp;amp;height=1012" alt="desoldered-som">.&lt;/p>
+&lt;p>Then after sleeping on the idea of desoldering 10+ of these, I realized this probably isn&amp;rsquo;t the move for this project.&lt;/p>
+&lt;p>As a side note&lt;/p>
+&lt;blockquote>
+&lt;p>FS: 1 (one) OSD3558-512M-BAS, slightly used $1000 OBO&lt;/p>
+&lt;/blockquote>
+&lt;p>So I had a look through &lt;a href="https://octopart.com/">Octopart&lt;/a>, and decided that this project was dumb and gave up.&lt;/p>
+&lt;h2 id="redesigning-the-pcb">Redesigning the PCB&lt;/h2>
+&lt;p>Then I made some coffee, sat down, and got to work redesigning the PCB for a &lt;a href="https://www.raspberrypi.com/products/compute-module-4/">Raspberry Pi Compute Module&lt;/a>. These are really cool modules, but not really specced for this application. They are obviously targeted at media applications, not industrial control protocols or much/any interaction with the outside world. Buuuut they do have one good thing going for them - I can get a few of them. Below is a table showing some of the important differences in the main CPUs.&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th style="text-align:center">SOM&lt;/th>
+&lt;th style="text-align:center">CPU Clock Speed&lt;/th>
+&lt;th style="text-align:center">CPU Cores&lt;/th>
+&lt;th style="text-align:center">RAM&lt;/th>
+&lt;th style="text-align:center">Available PWM&lt;/th>
+&lt;th style="text-align:center">USB Ports&lt;/th>
+&lt;th style="text-align:center">Native CAN support&lt;/th>
+&lt;th style="text-align:center">CSI (camera) ports&lt;/th>
+&lt;th style="text-align:center">DSI (display) ports&lt;/th>
+&lt;th style="text-align:center">HDMI ports&lt;/th>
+&lt;th>&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td style="text-align:center">OSD335x&lt;/td>
+&lt;td style="text-align:center">900 MHz&lt;/td>
+&lt;td style="text-align:center">1&lt;/td>
+&lt;td style="text-align:center">512MB&lt;/td>
+&lt;td style="text-align:center">a lot&lt;/td>
+&lt;td style="text-align:center">2&lt;/td>
+&lt;td style="text-align:center">yes&lt;/td>
+&lt;td style="text-align:center">0&lt;/td>
+&lt;td style="text-align:center">0&lt;/td>
+&lt;td style="text-align:center">0&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td style="text-align:center">CM4&lt;/td>
+&lt;td style="text-align:center">1.4 GHz&lt;/td>
+&lt;td style="text-align:center">4&lt;/td>
+&lt;td style="text-align:center">1-8 GB&lt;/td>
+&lt;td style="text-align:center">2 (3 are required)&lt;/td>
+&lt;td style="text-align:center">1 (2 were desired )&lt;/td>
+&lt;td style="text-align:center">no (required)&lt;/td>
+&lt;td style="text-align:center">2&lt;/td>
+&lt;td style="text-align:center">2&lt;/td>
+&lt;td style="text-align:center">2&lt;/td>
+&lt;td>&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;p>Soooo, while it technically is easier to obtain, the next issue is finding external components to do all the stuff I don&amp;rsquo;t need, notably CAN and RGB (the literal only requirements for this project).&lt;/p>
+&lt;p>Irritated, I hopped back onto OctoPart and started component hunting. First up was something about the PWM issue. I had two ideas for this, so to prevent further redesigns I decided to lay out both, just in case. The most straightforward solution is using some sort of IO Expander chip. I knew of one right off the top of my head: &lt;a href="https://www.futureelectronics.com/p/semiconductors--analog--drivers--led-drivers-linear-mode/PCA9685PW-112-nxp-1019213?utm_source=octopart&amp;amp;utm_medium=aggregator&amp;amp;utm_campaign=crossref&amp;amp;utm_term=PCA9685PW%2C112">NXP PCA9685PW,112&lt;/a>. It&amp;rsquo;s made specifically for controlling RGB LEDs via &lt;a href="https://en.wikipedia.org/wiki/I%C2%B2C">I²C&lt;/a>. Features include: &lt;a href="https://github.com/torvalds/linux/blob/master/drivers/pwm/pwm-pca9685.c">already having a driver in Linux&lt;/a> and being pretty straight forward to design around. Bad news is it&amp;rsquo;s really popular so I can&amp;rsquo;t find it anywhere. So, the backup then: &lt;a href="https://www.raspberrypi.com/products/raspberry-pi-pico/">A Raspberry Pi Pico&lt;/a>. I originally planned on using just the RP2040 chip, but you guessed it - out of stock. I connected it to the CM4 via I²C, and slapped it down on the board.&lt;/p>
+&lt;p>The other missing main component is something that speaks &lt;a href="https://en.wikipedia.org/wiki/CAN_bus">CAN&lt;/a>. Again, I already had an idea for this as well. &lt;a href="https://www.microchip.com/en-us/product/MCP2515">The MCP2515&lt;/a>. It&amp;rsquo;s old, it&amp;rsquo;s not recommended for new designs, and I have a bunch of them in different packages on the shelf. Not much else to say about this chip other than because I have a bunch of them in 2 different packages, I plopped down a footprint for both of them on the board so I can just solder whichever without spinning a new board:&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/961786045333119076/unknown.png" alt="MCP Dual footprints">&lt;/p>
+&lt;p>In the shot above, &lt;code>U8&lt;/code> and &lt;code>U5&lt;/code> are both a &lt;code>MCP2515&lt;/code>, just in two different packages. (also photo&amp;rsquo;d is the &lt;code>pca9685&lt;/code> chip above.)&lt;/p>
+&lt;p>The other thing I tested this week was the &amp;ldquo;hack&amp;rdquo; of using a set of BSS138 N channel transistors to do the LED PWMing.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/643947340453118019/960593404012675132/IMG_20220404_113438.jpg?width=759&amp;amp;height=1012" alt="BSS138 prototype">&lt;/p>
+&lt;p>As it turns out, they are not suitable for this application. When I threw these prototype boards on my bench supply connected to the prototype, I managed to melt the transistor at 12V @ 2A. I &lt;strong>could&lt;/strong> just limit the brightness in software, but since I&amp;rsquo;m spinning the board anyway, I replaced them with a set of &lt;a href="https://en.wikipedia.org/wiki/MOSFET">Mosfets&lt;/a>.&lt;/p>
+&lt;p>Finally, after about a day of rerouting and updating everything, I was left with the new PCB. The best part, 93% procurable component selection.&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/957852929254113300/962089782127788072/unknown.png" alt="octopart-bom">&lt;/p>
+&lt;p>&lt;img src="https://media.discordapp.net/attachments/957852929254113300/962088847506800690/unknown.png" alt="rerouted-pcb-final">&lt;/p>
+&lt;h2 id="conclusions">Conclusions&lt;/h2>
+&lt;p>I&amp;rsquo;m not super happy that I had to go through all this, but for what it&amp;rsquo;s worth, using the CM4 module was &lt;em>very&lt;/em> easy, Even if it&amp;rsquo;s not the perfect selection. I really wanted to use the OSD335x chip since it&amp;rsquo;s a really cool chip, and has all the stuff I need built right into it. I&amp;rsquo;m sure I &lt;strong>could&lt;/strong> have hunted around for another SOM. Several come to mind, the OSD32MP1, Most of the IMX line, etc. But upon quick searches, they are all just as hard to get as the OS335x.
+The other interesting part of all of this is that the BOM price actually went down by quite a bit. I wasn&amp;rsquo;t keeping super good track of this since most of the components I selected for the original design are out of stock and therefor artifically inflated in price. It&amp;rsquo;s kind of frustrating that it was easier to use something designed for set top boxes than it was to use something purpose built for my project but oh well.&lt;/p>
+&lt;p>Tune back in next week to see if I give entirely for real this time.&lt;/p></content></item><item><title>Using PWM with Nerves</title><link>https://cone.codes/posts/nerves-pwm/</link><pubDate>Mon, 04 Apr 2022 19:07:10 -0600</pubDate><guid>https://cone.codes/posts/nerves-pwm/</guid><description>TLDR This is probably what you need. Take it and modify it as you see fit.
 defmodule MyAPP.PWM do @moduledoc &amp;#34;&amp;#34;&amp;#34; Basic control pwm: ehrpwm1A == pwmchip2/pwm0 (LED R) ehrpwm1B == pwmchip2/pwm1 (LED G) ehrpwm2A == pwmchip0/pwm0 (LED B) &amp;#34;&amp;#34;&amp;#34; @pwms [ led_r: {2, 0}, led_g: {2, 1}, led_b: {0, 0}, ] # Period for 25kHz PWM @period 40_000 def init() do @pwms |&amp;gt; Enum.</description><content>&lt;h2 id="tldr">TLDR&lt;/h2>
 &lt;p>This is probably what you need. Take it and modify it as you see fit.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-elixir" data-lang="elixir">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">defmodule&lt;/span> &lt;span style="color:#a6e22e">MyAPP.PWM&lt;/span> &lt;span style="color:#66d9ef">do&lt;/span>
