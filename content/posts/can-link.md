@@ -2,7 +2,7 @@
 title = "Can Link"
 date = "2022-04-01T23:17:51-06:00"
 author = "Connor Rigby"
-authorTwitter = "@PressY4Pie" 
+authorTwitter = "PressY4Pie" 
 cover = "https://media.discordapp.net/attachments/957852929254113300/959576291563163708/unknown.png"
 tags = ["can-link", "elixir", "nerves", "embedded linux", "linux"]
 keywords = ["linux", "elixir", "nerves"]
