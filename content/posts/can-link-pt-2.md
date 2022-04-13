@@ -1,12 +1,12 @@
 +++
-title = "Can Link Part 2"
+title = "CAN Link Part 2"
 date = "2022-04-08T15:19:25-06:00"
 author = "Connor Rigby"
-authorTwitter = "PressY4Pie" #do not include @
+authorTwitter = "PressY4Pie"
 cover = "https://media.discordapp.net/attachments/957852929254113300/962088847506800690/unknown.png"
 tags = ["can-link", "elixir", "nerves", "embedded linux", "linux"]
 keywords = ["linux", "elixir", "nerves"]
-description = "Automotive Nerves Project - RGB Controller with CAN Interface"
+description = "Automotive Nerves Project - RGB Controller with CAN Interface Part 2"
 +++
 
 Last week, I closed with
@@ -34,7 +34,7 @@ Then I made some coffee, sat down, and got to work redesigning the PCB for a [Ra
 | OSD335x | 900 MHz | 1 | 512MB | a lot | 2 | yes | 0 | 0 | 0 |
 | CM4 | 1.4 GHz | 4 |1-8 GB | 2 (3 are required) | 1 (2 were desired ) | no (required) | 2 | 2 | 2 |
 
-Soooo, while it technically is easier to obtain, the next issue is finding external components to do all the stuff I don't need, notably CAN and RGB (the literal only requirements for this project). 
+Soooo, while it technically is easier to obtain, the next issue is finding external components to do all the stuff I don't need, notably CAN and RGB (the literal only requirements for this project).
 
 Irritated, I hopped back onto OctoPart and started component hunting. First up was something about the PWM issue. I had two ideas for this, so to prevent further redesigns I decided to lay out both, just in case. The most straightforward solution is using some sort of IO Expander chip. I knew of one right off the top of my head: [NXP PCA9685PW,112](https://www.futureelectronics.com/p/semiconductors--analog--drivers--led-drivers-linear-mode/PCA9685PW-112-nxp-1019213?utm_source=octopart&utm_medium=aggregator&utm_campaign=crossref&utm_term=PCA9685PW%2C112). It's made specifically for controlling RGB LEDs via [I²C](https://en.wikipedia.org/wiki/I%C2%B2C). Features include: [already having a driver in Linux](https://github.com/torvalds/linux/blob/master/drivers/pwm/pwm-pca9685.c) and being pretty straight forward to design around. Bad news is it's really popular so I can't find it anywhere. So, the backup then: [A Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/). I originally planned on using just the RP2040 chip, but you guessed it - out of stock. I connected it to the CM4 via I²C, and slapped it down on the board.
 

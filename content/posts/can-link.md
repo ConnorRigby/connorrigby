@@ -1,5 +1,5 @@
 +++
-title = "Can Link"
+title = "CAN Link"
 date = "2022-04-01T23:17:51-06:00"
 author = "Connor Rigby"
 authorTwitter = "PressY4Pie" 
@@ -32,7 +32,7 @@ etc.
 The first step (after making a prototype ofc) was to make the schematic. Another reason I picked
 this devboard was beause of how simple it is. The entire schematic is 5 pages long, and fits
 into a single PDF. [Here it is](https://github.com/beagleboard/beaglebone-blue/blob/9812bd927a0157a0a326debb858e36678e6eed64/BeagleBone_Blue_sch.pdf).
-I [tricked a friend of mine into importing it into kicad](https://github.com/miata-bot/can-link/commit/69d136ebbe92c61059c85afc6919afc3817271a1) for me, then got to modifying it. 
+I [tricked a friend of mine into importing it into kicad](https://github.com/miata-bot/can-link/commit/69d136ebbe92c61059c85afc6919afc3817271a1) for me, then got to modifying it.
 
 ## The Schematic
 
