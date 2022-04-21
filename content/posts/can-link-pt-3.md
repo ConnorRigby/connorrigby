@@ -1,11 +1,11 @@
 +++
-title = "CAN Link Pt 3"
+title = "CAN Link Part 3"
 date = 2022-04-13T06:29:07-06:00
 author = "Connor Rigby"
 authorTwitter = "PressY4Pie"
 cover = "https://media.discordapp.net/attachments/957852929254113300/963603624628469770/unknown.png?width=807&height=418"
-tags = ["can-link", "elixir", "nerves", "embedded linux", "linux"]
-keywords = ["linux", "elixir", "nerves"]
+tags = ["can-link", "nerves", "kicad", "embedded linux", "linux"]
+keywords = ["linux", "kicad"]
 description = "Automotive Nerves Project - RGB Controller with CAN Interface Part 3"
 +++
 
