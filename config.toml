@@ -3,6 +3,7 @@ languageCode = 'en-us'
 title = 'Useful snippits you wont ever remember'
 theme = "terminal"
 paginate = 5
+googleAnalytics = "G-232FYPH9EF"
 
 [params]
   # dir name of your main content (default is `content/posts`).
