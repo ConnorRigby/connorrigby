@@ -54,7 +54,7 @@ Right before clicking buy on the last revision&amp;rsquo;s PCBs, a friend of min
 &lt;p>&lt;img src="https://media.discordapp.net/attachments/957852929254113300/963603624628469770/unknown.png?width=807&amp;amp;height=418" alt="cad">&lt;/p>
 &lt;p>In other tangentally related news, I made the repository &lt;a href="https://github.com/miata-bot/can-link">public&lt;/a>. Stay tuned for next time, I plan to write up a quick post on &amp;ldquo;porting&amp;rdquo; all the existing software to the new hardware platform.&lt;/p></content></item><item><title>CAN Link Part 2</title><link>https://cone.codes/posts/can-link-pt-2/</link><pubDate>Fri, 08 Apr 2022 15:19:25 -0600</pubDate><guid>https://cone.codes/posts/can-link-pt-2/</guid><description>Last week, I closed with
 I ordered a few OSD335X chips on Aliexpress. Tune back in next week to see if they show up or not.
-Well, it&amp;rsquo;s next week, and my order got canceled. I ordered s&amp;rsquo;more from other places, and it was canceled. I Couldn&amp;rsquo;t even find anywhere that had a single SOM for me to buy. Best I could find was Minimum Order Quantity of 250 pieces.</description><content>&lt;p>Last week, I closed with&lt;/p>
+Well, it&amp;rsquo;s next week, and my order got canceled. I ordered s&amp;rsquo;more from other places, and it was canceled. I Couldn&amp;rsquo;t even find anywhere that had a single SOM for me to buy. Best I could find was Minimum Order Quantity of 250 pieces. So I did what any reasonable person would do; Desoldered some from old, broken boards.</description><content>&lt;p>Last week, I closed with&lt;/p>
 &lt;blockquote>
 &lt;p>I ordered a few OSD335X chips on Aliexpress. Tune back in next week to see if they show up or not.&lt;/p>
 &lt;/blockquote>

@@ -69,19 +69,19 @@
 </span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
 </span></span><span style=display:flex><span><span style=color:#66d9ef>end</span>
 </span></span></code></pre></div><h2 id=pwm-in-linux>PWM In Linux<a href=#pwm-in-linux class=hanchor arialabel=Anchor>&#8983;</a></h2><p>I&rsquo;ve always found using PWM in Linux unnecessarily tedious. When I first got started in Embedded Linux, I was coming from experience with Arduino. Love it or hate it, Arduino has this particular feature dialed in from the beginning.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>setup</span>() {
-</span></span><span style=display:flex><span>  pinMode(A0, OUTPUT);
-</span></span><span style=display:flex><span>  analogWrite(A0, <span style=color:#ae81ff>255</span>);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>pinMode</span>(A0, OUTPUT);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>analogWrite</span>(A0, <span style=color:#ae81ff>255</span>);
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><p>That&rsquo;s it.</p><p>Okay, so obviously it&rsquo;s not a completely fair comparison, Arduino is a C++ framework, Linux is an operating system yada yada. Anyway here&rsquo;s the snippit from the <a href=https://www.kernel.org/doc/html/latest/driver-api/pwm.html>Linux
 Kernel Documentation</a></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>struct</span> pwm_lookup board_pwm_lookup[] <span style=color:#f92672>=</span> {
-</span></span><span style=display:flex><span>        PWM_LOOKUP(<span style=color:#e6db74>&#34;tegra-pwm&#34;</span>, <span style=color:#ae81ff>0</span>, <span style=color:#e6db74>&#34;pwm-backlight&#34;</span>, NULL,
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>PWM_LOOKUP</span>(<span style=color:#e6db74>&#34;tegra-pwm&#34;</span>, <span style=color:#ae81ff>0</span>, <span style=color:#e6db74>&#34;pwm-backlight&#34;</span>, NULL,
 </span></span><span style=display:flex><span>                   <span style=color:#ae81ff>50000</span>, PWM_POLARITY_NORMAL),
 </span></span><span style=display:flex><span>};
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> __init <span style=color:#a6e22e>board_init</span>(<span style=color:#66d9ef>void</span>)
 </span></span><span style=display:flex><span>{
 </span></span><span style=display:flex><span>        ...
-</span></span><span style=display:flex><span>        pwm_add_table(board_pwm_lookup, ARRAY_SIZE(board_pwm_lookup));
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>pwm_add_table</span>(board_pwm_lookup, <span style=color:#a6e22e>ARRAY_SIZE</span>(board_pwm_lookup));
 </span></span><span style=display:flex><span>        ...
 </span></span><span style=display:flex><span>}
 </span></span></code></pre></div><p>Alright <strong>what?</strong> So as it turns out that part of the document is completely irelevant to actually <em>using</em> PWM. If you read down further, you&rsquo;ll find</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>pwm_apply_state</span>(<span style=color:#66d9ef>struct</span> pwm_device <span style=color:#f92672>*</span>pwm, <span style=color:#66d9ef>struct</span> pwm_state <span style=color:#f92672>*</span>state);
@@ -195,6 +195,8 @@ Kernel Documentation</a></p><div class=highlight><pre tabindex=0 style=color:#f8
 </span></span></code></pre></div></div></div><div class=pagination><div class=pagination__title><span class=pagination__title-h>Read other posts</span><hr></div><div class=pagination__buttons><span class="button previous"><a href=https://cone.codes/posts/can-link-pt-2/><span class=button__icon>←</span>
 <span class=button__text>CAN Link Part 2</span></a></span>
 <span class="button next"><a href=https://cone.codes/posts/can-link/><span class=button__text>CAN Link</span>
-<span class=button__icon>→</span></a></span></div></div></div></div><footer class=footer><div class=footer__inner><div class="copyright copyright--user"><span>Creative Commons Attribution 4.0 International</span>
-<span>:: Theme made by <a href=https://twitter.com/panr>panr</a></span></div></div></footer><script src=https://cone.codes/assets/main.js></script>
-<script src=https://cone.codes/assets/prism.js></script></div></body></html>
+<span class=button__icon>→</span></a></span></div></div></div></div><span style=display:inline-block;margin-left:1em>© 2022 <a href=https://cone.codes>Connor Rigby</a>
+<a href=https://creativecommons.org/licenses/by-sa/4.0/>CC BY-SA</a>
+<a rel=me href=https://fosstodon.org/@PressY4Pie>Mastodon</a>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a></span></div></body></html>
