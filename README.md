@@ -57,3 +57,4 @@ You can find me on all the things:
 * [Twitter: @PressY4Pie](https://twitter.com/PressY4Pie)
 * [Instagram: @PressY4Pie](https://www.instagram.com/PressY4Pie/)
 * Discord: @PressY4Pie#0690
+<a rel="me" href="https://fosstodon.org/@PressY4Pie">Mastodon</a>
