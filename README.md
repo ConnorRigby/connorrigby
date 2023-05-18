@@ -1,8 +1,7 @@
 # Connor Rigby
 
 Primarily an Elixir developer by trade. I do mostly embedded Linux applications
-for fun and profit. Currently working at [KEEP](https://discoverkeep.com) developing a IOT product using
-[Elixir](https://elixir-lang.org/) and [Nerves](https://www.nerves-project.org/)
+for fun and profit.
 
 Previously worked as a contractor for [BinaryNoggin](https://binarynoggin.com/) and
 as the lead embedded developer at [FarmBot](https://farm.bot/)
