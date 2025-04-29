@@ -1,12 +1,6 @@
 # Connor Rigby
 
-Primarily an Elixir developer by trade. I do mostly embedded Linux applications
-for fun and profit.
-
-Previously worked as a contractor for [BinaryNoggin](https://binarynoggin.com/) and
-as the lead embedded developer at [FarmBot](https://farm.bot/)
-
-When not coding for profit, you will likely find me coding for fun. See [Projects](#Unfinished-Projects) for what that's all about.
+Elixir Developer
 
 ## Open Source
 
